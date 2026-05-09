@@ -135,25 +135,44 @@ export function ExamTake({ token, examId, me, onClose }) {
     return () => clearInterval(timer);
   }, [timeLeft, isSubmitting]);
 
-  // --- TÍNH NĂNG AUTO-SAVE (Mỗi 30 giây lưu 1 lần) ---
+  // 👇 CHÈN ĐOẠN NÀY VÀO THAY THẾ ĐOẠN AUTO-SAVE CŨ 👇
+  
+  // 1. Tạo "kho bí mật" để chứa dữ liệu mới nhất mà không làm reset đồng hồ
+  const latestAnswers = React.useRef(answers);
+  const latestTimeLeft = React.useRef(timeLeft);
+
+  // 2. Cập nhật kho liên tục mỗi khi ông tick đáp án hoặc đồng hồ nhảy số
   useEffect(() => {
-    // Không lưu nếu đang nộp bài, hoặc chưa load xong data, hoặc chưa làm câu nào
-    if (isSubmitting || !data || Object.keys(answers).length === 0) return;
+    latestAnswers.current = answers;
+    latestTimeLeft.current = timeLeft;
+  }, [answers, timeLeft]);
+
+  // 3. TÍNH NĂNG AUTO-SAVE (Chạy vòng lặp chuẩn 30 giây độc lập)
+  useEffect(() => {
+    if (isSubmitting || !data) return;
     
     const autosaveTimer = setInterval(() => {
-      console.log("Đang lưu nháp tự động...");
+      const currentAnswers = latestAnswers.current;
+      const currentTime = latestTimeLeft.current;
+
+      // Nếu chưa tick câu nào thì không lưu
+      if (Object.keys(currentAnswers).length === 0) return;
+
+      console.log("⏳ Đang lưu nháp tự động...");
       axios.post(`${API}/submissions/autosave`, {
         exam_id: examId,
         user_id: me.id,
-        answers: answers,
-        duration_seconds: (data.exam.duration * 60) - (timeLeft < 0 ? 0 : timeLeft)
+        answers: currentAnswers,
+        duration_seconds: (data.exam.duration * 60) - (currentTime < 0 ? 0 : currentTime)
       }, { headers: { Authorization: "Bearer " + token } })
       .then(() => console.log("✅ Lưu nháp thành công!"))
       .catch((err) => console.error("❌ Lỗi lưu nháp:", err));
-    }, 30000); // 30 giây
+      
+    }, 30000); // Đếm chuẩn 30 giây không bị ngắt quãng
 
     return () => clearInterval(autosaveTimer);
-  }, [answers, timeLeft, isSubmitting, examId, me.id, data, token]);
+  }, [isSubmitting, examId, me.id, data, token]); 
+  // 👆 KẾT THÚC ĐOẠN CHÈN 👆
   // ----------------------------------------------------
 
   const submit = async (isAuto = false) => {
