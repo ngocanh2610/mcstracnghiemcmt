@@ -25,7 +25,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- 1. ENDPOINT NỘP BÀI (POST /) ---
+// --- 1.1 ENDPOINT NỘP BÀI (POST /) ---
 app.post("/", async (req, res) => {
     const { exam_id, user_id, answers, duration_seconds } = req.body;
     if (!exam_id || !user_id || !answers) return res.status(400).json({ error: "Dữ liệu thiếu" });
@@ -65,7 +65,7 @@ app.post("/", async (req, res) => {
     }
 });
 
-// --- 1.5 ENDPOINT LƯU NHÁP (POST /autosave) ---
+// --- 1.2 ENDPOINT LƯU NHÁP
 app.post("/autosave", async (req, res) => {
     const { exam_id, user_id, answers, duration_seconds } = req.body;
     if (!exam_id || !user_id) return res.status(400).json({ error: "Thiếu exam_id hoặc user_id" });

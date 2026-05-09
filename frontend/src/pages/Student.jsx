@@ -135,6 +135,27 @@ export function ExamTake({ token, examId, me, onClose }) {
     return () => clearInterval(timer);
   }, [timeLeft, isSubmitting]);
 
+  // --- TÍNH NĂNG AUTO-SAVE (Mỗi 30 giây lưu 1 lần) ---
+  useEffect(() => {
+    // Không lưu nếu đang nộp bài, hoặc chưa load xong data, hoặc chưa làm câu nào
+    if (isSubmitting || !data || Object.keys(answers).length === 0) return;
+    
+    const autosaveTimer = setInterval(() => {
+      console.log("Đang lưu nháp tự động...");
+      axios.post(`${API}/submissions/autosave`, {
+        exam_id: examId,
+        user_id: me.id,
+        answers: answers,
+        duration_seconds: (data.exam.duration * 60) - (timeLeft < 0 ? 0 : timeLeft)
+      }, { headers: { Authorization: "Bearer " + token } })
+      .then(() => console.log("✅ Lưu nháp thành công!"))
+      .catch((err) => console.error("❌ Lỗi lưu nháp:", err));
+    }, 30000); // 30 giây
+
+    return () => clearInterval(autosaveTimer);
+  }, [answers, timeLeft, isSubmitting, examId, me.id, data, token]);
+  // ----------------------------------------------------
+
   const submit = async (isAuto = false) => {
     const unansweredCount = data.questions.length - Object.keys(answers).length;
     if (!isAuto && unansweredCount > 0) {
