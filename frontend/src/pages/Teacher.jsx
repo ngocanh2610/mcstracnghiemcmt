@@ -312,7 +312,6 @@ export function ExamManager({ token, me, onEditQuestions, onViewStats }) {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Trạng thái quản lý view nội bộ: 'list', 'stats', 'edit'
   const [activeView, setActiveView] = useState('list');
   const [selectedExamId, setSelectedExamId] = useState(null);
 
@@ -437,6 +436,7 @@ export function ExamManager({ token, me, onEditQuestions, onViewStats }) {
     </div>
   );
 }
+
 export function TeacherPanel({ token, me, refresh }) {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
@@ -445,10 +445,9 @@ export function TeacherPanel({ token, me, refresh }) {
   const [subjects, setSubjects] = useState([]);
   const [bankQuestions, setBankQuestions] = useState([]);
   const [selectedQs, setSelectedQs] = useState([]);
-  const [randomCount, setRandomCount] = useState(5);//mặc đinh lấy 5 câu ngẫu nhiên khi nhấn nút xác nhận
+  const [randomCount, setRandomCount] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Lấy danh sách môn học an toàn
   useEffect(() => {
     if (!token) return;
     axios.get(`${API}/exams/banks/list/subjects`, { headers: { Authorization: "Bearer " + token } })
@@ -456,7 +455,6 @@ export function TeacherPanel({ token, me, refresh }) {
       .catch(e => console.error("Lỗi tải môn học:", e));
   }, [token]);
 
-  // Lấy câu hỏi theo môn an toàn
   useEffect(() => {
     if (!subject || !token) {
       setBankQuestions([]);
@@ -474,7 +472,7 @@ export function TeacherPanel({ token, me, refresh }) {
     setIsSubmitting(true);
     try {
       const resExam = await axios.post(`${API}/exams`,
-        { title, subject, created_by: me?.id, duration },
+        { title, subject, created_by: me?.id, duration: Number(duration) },
         { headers: { Authorization: "Bearer " + token } }
       );
       const newExamId = resExam.data.id;
@@ -525,15 +523,31 @@ export function TeacherPanel({ token, me, refresh }) {
           {subjects.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
 
-        {/* Nút Tạo đề thi: Bỏ width 100% và marginTop để nó nằm gọn trên một hàng */}
+        {/* THỜI GIAN LÀM BÀI ĐƯỢC CHÈN VÀO ĐÂY */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            type="number"
+            className="login-input"
+            style={{ width: '80px', margin: 0, textAlign: 'center' }}
+            value={duration}
+            onChange={e => setDuration(e.target.value)}
+            min="1"
+            title="Thời gian làm bài (phút)"
+          />
+          <span style={{ color: '#64748b', fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap' }}>
+            phút
+          </span>
+        </div>
+
+        {/* Nút Tạo đề thi */}
         <button
           className="btn-primary"
           style={{
             margin: 0,
             padding: '0 25px',
-            height: '45px', // Cho cao bằng với input/select
-            whiteSpace: 'nowrap', // Không cho chữ bị xuống dòng
-            flexShrink: 0 // Không cho nút bị co lại
+            height: '45px',
+            whiteSpace: 'nowrap',
+            flexShrink: 0
           }}
           onClick={handleSaveExam}
           disabled={isSubmitting}
@@ -553,9 +567,9 @@ export function TeacherPanel({ token, me, refresh }) {
                   style={{ padding: '4px 10px', fontSize: '13px', borderRadius: '6px', border: '1px solid #10b981', color: '#10b981', background: '#ecfdf5', cursor: 'pointer', fontWeight: 'bold' }}
                   onClick={() => {
                     if (selectedQs.length === bankQuestions.length) {
-                      setSelectedQs([]); // Bỏ chọn tất cả
+                      setSelectedQs([]);
                     } else {
-                      setSelectedQs(bankQuestions.map(q => q.id)); // Chọn tất cả
+                      setSelectedQs(bankQuestions.map(q => q.id));
                     }
                   }}
                 >
@@ -564,13 +578,11 @@ export function TeacherPanel({ token, me, refresh }) {
               )}
             </div>
 
-            {/* KHU VỰC MỚI: Ô nhập số n và nút Xác nhận */}
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <span style={{ fontSize: '14px', color: '#64748b' }}>Lấy ngẫu nhiên:</span>
               <input
                 type="number"
                 value={randomCount}
-                // Cập nhật state randomCount khi người dùng gõ số
                 onChange={(e) => setRandomCount(parseInt(e.target.value) || 0)}
                 style={{
                   width: '60px',
@@ -581,7 +593,7 @@ export function TeacherPanel({ token, me, refresh }) {
                   fontSize: '14px'
                 }}
                 min="1"
-                max={bankQuestions.length} // Không cho nhập quá số câu đang có
+                max={bankQuestions.length}
                 placeholder="H"
               />
               <span style={{ fontSize: '14px', color: '#64748b', marginRight: '5px' }}>câu</span>
@@ -590,15 +602,13 @@ export function TeacherPanel({ token, me, refresh }) {
                 className="btn-outline"
                 style={{ padding: '6px 12px', background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '14px', cursor: 'pointer' }}
                 onClick={() => {
-                  // Kiểm tra điều kiện trước khi random
                   if (randomCount <= 0) return alert("Vui lòng nhập số câu muốn lấy (lớn hơn 0)!");
                   if (randomCount > bankQuestions.length) return alert(`Ngân hàng chỉ có ${bankQuestions.length} câu, không thể lấy ${randomCount} câu!`);
 
-                  // Thuật toán xáo trộn và lấy n câu
                   const shuffled = [...bankQuestions].sort(() => 0.5 - Math.random());
                   const pickedIds = shuffled.slice(0, randomCount).map(q => q.id);
 
-                  setSelectedQs(pickedIds); // Cập nhật danh sách các câu được tick
+                  setSelectedQs(pickedIds);
                   alert(`🎉 Đã chọn ngẫu nhiên ${randomCount} câu hỏi! Hãy kiểm tra danh sách bên dưới.`);
                 }}
               >
@@ -629,7 +639,7 @@ export function TeacherPanel({ token, me, refresh }) {
                 <input
                   type="checkbox"
                   checked={selectedQs.includes(q.id)}
-                  onChange={() => {}} // dummy handler, logic is in the div's onClick
+                  onChange={() => {}}
                   style={{ cursor: 'pointer', width: '18px', height: '18px', accentColor: '#10b981', margin: 0, pointerEvents: 'none' }}
                 />
                 <span style={{ 
@@ -650,49 +660,46 @@ export function TeacherPanel({ token, me, refresh }) {
     </div>
   );
 }
+
 export function QuestionBankManager({ token }) {
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("");
   const [questions, setQuestions] = useState([]);
 
-  // Form thêm câu hỏi
   const [newSub, setNewSub] = useState("");
   const [qText, setQText] = useState("");
   const [optTexts, setOptTexts] = useState(["", "", "", ""]);
   const [correctIdx, setCorrectIdx] = useState(0);
 
-  const [editingId, setEditingId] = useState(null); // Lưu ID câu hỏi đang sửa
+  const [editingId, setEditingId] = useState(null); 
 
   const loadSubjects = async () => {
     try {
       const r = await axios.get(`${API}/exams/banks/list/subjects`, { headers: { Authorization: "Bearer " + token } });
       setSubjects(r.data);
-      // Mặc định không chọn môn nào
     } catch (e) { console.log(e); }
   };
 
-// Trong QuestionBankManager
-const loadQuestions = async (sub) => {
-  if (!sub) return;
-  try {
-    const res = await axios.get(`${API}/exams/banks/subject/${sub}`, { 
-      headers: { Authorization: "Bearer " + token } 
-    });
-    // Đảm bảo setQuestions khớp với biến bạn dùng ở phần map
-    setQuestions(res.data); 
-  } catch (e) {
-    console.error("Lỗi tải câu hỏi:", e);
-  }
-};
+  const loadQuestions = async (sub) => {
+    if (!sub) return;
+    try {
+      const res = await axios.get(`${API}/exams/banks/subject/${sub}`, { 
+        headers: { Authorization: "Bearer " + token } 
+      });
+      setQuestions(res.data); 
+    } catch (e) {
+      console.error("Lỗi tải câu hỏi:", e);
+    }
+  };
 
-// Quan trọng nhất: Tự động tải lại danh sách khi chọn môn
-useEffect(() => {
-  if (selectedSubject) {
-    loadQuestions(selectedSubject);
-  } else {
-    setQuestions([]); // Nếu không chọn môn thì xóa trắng danh sách
-  }
-}, [selectedSubject]);
+  useEffect(() => {
+    if (selectedSubject) {
+      loadQuestions(selectedSubject);
+    } else {
+      setQuestions([]); 
+    }
+  }, [selectedSubject]);
+  
   useEffect(() => { loadSubjects(); }, []);
   useEffect(() => { loadQuestions(selectedSubject); }, [selectedSubject]);
 
@@ -725,32 +732,30 @@ useEffect(() => {
     } catch (e) { alert("Lỗi khi thêm vào ngân hàng!"); }
   };
 
-const updateQuestion = async () => {
-  try {
-    const finalSub = newSub || selectedSubject;
-    await axios.put(`${API}/exams/banks/${editingId}`, {
-      subject: finalSub,
-      text: qText,
-      options: optTexts.map((t, i) => ({ text: t, code: String.fromCharCode(65 + i), is_correct: i === correctIdx }))
-    }, { headers: { Authorization: "Bearer " + token } });
+  const updateQuestion = async () => {
+    try {
+      const finalSub = newSub || selectedSubject;
+      await axios.put(`${API}/exams/banks/${editingId}`, {
+        subject: finalSub,
+        text: qText,
+        options: optTexts.map((t, i) => ({ text: t, code: String.fromCharCode(65 + i), is_correct: i === correctIdx }))
+      }, { headers: { Authorization: "Bearer " + token } });
 
-    alert("Cập nhật thành công!");
-    setEditingId(null);
-    setQText("");
-    setOptTexts(["", "", "", ""]);
-    setCorrectIdx(0);
-    loadQuestions(finalSub);
-  } catch (e) { alert("Lỗi khi cập nhật!"); }
-};
+      alert("Cập nhật thành công!");
+      setEditingId(null);
+      setQText("");
+      setOptTexts(["", "", "", ""]);
+      setCorrectIdx(0);
+      loadQuestions(finalSub);
+    } catch (e) { alert("Lỗi khi cập nhật!"); }
+  };
 
-  // Hàm này dùng để gắn vào nút ✏️ bên danh sách câu hỏi
   const startEdit = (q) => {
     setEditingId(q.id);
     setSelectedSubject(q.subject);
     setQText(q.text);
     setOptTexts(q.options?.map(o => o.text) || ["", "", "", ""]);
     setCorrectIdx(q.options?.findIndex(o => o.is_correct) ?? 0);
-    // Cuộn lên đầu trang nếu cần
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -762,14 +767,12 @@ const updateQuestion = async () => {
     } catch (e) { alert("Lỗi khi xóa!"); }
   };
 
-  // ===== HÀM PARSE FILE WORD =====
   const parseWordFile = async (file) => {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const result = await mammoth.extractRawText({ arrayBuffer });
       let text = result.value;
       
-      // Xử lý line breaks: \r\n -> \n
       text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
       
       const lines = text.split('\n')
@@ -782,30 +785,25 @@ const updateQuestion = async () => {
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         
-        // Nhận dạng câu hỏi (bắt đầu bằng Câu hoặc chỉ là nội dung)
         if (line.match(/^(Câu\s*\d+:|Question\s*\d+:|^\d+\.)/i) || 
             (currentQ === null && !line.match(/^[A-D][\.\)]/))) {
           if (currentQ !== null) questions.push(currentQ);
           
-          // Loại bỏ tiền tố "Câu X:" hoặc "Question X:"
           const qText = line.replace(/^(Câu\s*\d+:|Question\s*\d+:|^\d+\.)\s*/i, '');
           currentQ = { text: qText, options: [] };
         }
-        // Nhận dạng đáp án (A., B., C., D. hoặc A), B), v.v)
         else if (currentQ && line.match(/^[A-D][\.\)]/)) {
           const code = line[0];
           let optionText = line.substring(2).trim();
           
-          // Kiểm tra đáp án đúng (có * hoặc "(Đúng)" hoặc "(Correct)")
           const isCorrect = /[\*]\s*$/.test(optionText) || 
                           /\(Đúng\)|\(Correct\)|\(đúng\)/.test(optionText);
           
-          // Loại bỏ dấu *, (Đúng), (Correct), v.v
           optionText = optionText
-            .replace(/\*\s*$/, '')                    // Bỏ * ở cuối
-            .replace(/\s*\(Đúng\)/, '')               // Bỏ (Đúng)
-            .replace(/\s*\(Correct\)/, '')            // Bỏ (Correct)
-            .replace(/\s*\(đúng\)/, '')               // Bỏ (đúng)
+            .replace(/\*\s*$/, '')                    
+            .replace(/\s*\(Đúng\)/, '')               
+            .replace(/\s*\(Correct\)/, '')            
+            .replace(/\s*\(đúng\)/, '')               
             .trim();
           
           if (optionText.length > 0) {
@@ -818,7 +816,6 @@ const updateQuestion = async () => {
         questions.push(currentQ);
       }
       
-      // Kiểm tra tính hợp lệ
       const validQuestions = questions.filter(q => q.options.length >= 2);
       
       if (validQuestions.length === 0) {
@@ -826,14 +823,13 @@ const updateQuestion = async () => {
         return null;
       }
       
-      // Mỗi câu phải có ít nhất 1 đáp án đúng
       for (let q of validQuestions) {
         if (!q.options.some(opt => opt.is_correct)) {
-          q.options[0].is_correct = true; // Mặc định đáp án A nếu không có dấu
+          q.options[0].is_correct = true; 
         }
       }
       
-      console.log("✅ Parse thành công:", validQuestions); // Log để debug
+      console.log("✅ Parse thành công:", validQuestions); 
       return validQuestions;
     } catch (e) {
       alert("❌ Lỗi khi đọc file: " + e.message);
@@ -863,7 +859,6 @@ const updateQuestion = async () => {
     if (!window.confirm(`Sẽ import ${questions.length} câu hỏi vào môn ${subToUse}. Tiếp tục?`)) return;
 
     try {
-      // Gửi batch câu hỏi
       await axios.post(`${API}/exams/banks-batch`, {
         subject: subToUse,
         questions: questions
@@ -876,15 +871,14 @@ const updateQuestion = async () => {
       } else {
         setSelectedSubject(subToUse);
       }
-      e.target.value = ""; // Reset file input
+      e.target.value = ""; 
     } catch (e) {
       alert("❌ Lỗi khi import: " + (e.response?.data?.error || e.message));
     }
   };
 
-return (
+  return (
     <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-      {/* CỘT TRÁI: THÊM / SỬA CÂU HỎI */}
       <div className="card" style={{ flex: 1, padding: '20px', background: '#fff', borderRadius: '12px' }}>
         <h3 style={{ marginTop: 0 }}>
           {editingId ? "📝 Chỉnh sửa câu hỏi" : "Thêm câu hỏi mới"}
@@ -969,7 +963,6 @@ return (
           )}
         </div>
 
-        {/* ===== PHẦN IMPORT FILE WORD ===== */}
         <div style={{ marginTop: '25px', paddingTop: '20px', borderTop: '2px solid #f1f5f9' }}>
           <h4 style={{ margin: '0 0 15px 0', color: '#1e293b' }}>📄 Hoặc import từ file Word</h4>
           
@@ -1021,26 +1014,23 @@ D. Tùy chọn 4`}
         </div>
       </div>
 
-{/* CỘT PHẢI: DANH SÁCH CÂU HỎI */}
       <div 
         className="card" 
         style={{ 
           flex: 1.2, 
           padding: '24px', 
           background: '#ffffff', 
-          borderRadius: '16px', // Bo góc lớn hơn cho khối ngoài
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)', // Đổ bóng mờ nổi bật khối
+          borderRadius: '16px', 
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)', 
           border: '1px solid #f1f5f9' 
         }}
       >
-        {/* Phần Tiêu đề có đường gạch chân phân cách */}
         <div style={{ paddingBottom: '16px', borderBottom: '2px solid #f1f5f9', marginBottom: '16px' }}>
           <h3 style={{ margin: 0, color: '#1e293b', fontSize: '18px' }}>
             📋 Danh sách câu hỏi môn: <span style={{ color: '#3b82f6' }}>{selectedSubject || "..."}</span>
           </h3>
         </div>
 
-        {/* Nút Select All / Unselect All */}
         {selectedSubject && questions.length > 0 && (
           <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
             <button
@@ -1091,30 +1081,28 @@ D. Tùy chọn 4`}
           </div>
         )}
         
-        {/* Khung bao quanh danh sách (Có nền xám nhạt và viền rõ ràng) */}
         <div 
           style={{ 
             maxHeight: '600px', 
             overflowY: 'auto',
-            background: '#f8fafc', // Nền xám nhạt để làm nổi bật các thẻ câu hỏi màu trắng
-            borderRadius: '12px', // Bo góc khu vực chứa danh sách
+            background: '#f8fafc', 
+            borderRadius: '12px', 
             padding: '12px',
-            border: '1px solid #e2e8f0' // Viền bao quanh khung cuộn
+            border: '1px solid #e2e8f0' 
           }}
         >
           {questions && questions.length > 0 ? (
             questions.map((q, index) => (
-              // Mỗi câu hỏi giờ là một thẻ (card) nhỏ riêng biệt
               <div 
                 key={q.id || index} 
                 style={{ 
                   padding: '16px', 
-                  marginBottom: '12px', // Khoảng cách giữa các câu hỏi
+                  marginBottom: '12px', 
                   borderRadius: '10px',
                   border: editingId === q.id ? '2px solid #fbbf24' : '1px solid #e2e8f0', 
                   position: 'relative',
-                  background: editingId === q.id ? '#fffbeb' : (q.selected ? '#f0fdf4' : '#ffffff'), // Màu nền trắng (hoặc vàng nhạt nếu đang sửa)
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)', // Đổ bóng nhẹ cho từng câu
+                  background: editingId === q.id ? '#fffbeb' : (q.selected ? '#f0fdf4' : '#ffffff'), 
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)', 
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
                 }}
@@ -1127,26 +1115,20 @@ D. Tùy chọn 4`}
                 onMouseLeave={(e) => { if (!q.selected && editingId !== q.id) e.currentTarget.style.background = '#ffffff'; }}
               >
                 
-                {/* CHECKBOX CHỌN NHIỀU */}
                 <div style={{ position: 'absolute', top: '12px', left: '12px' }}>
                   <input
                     type="checkbox"
                     checked={!!q.selected}
-                    onChange={() => {}} // handled by div click
+                    onChange={() => {}} 
                     style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#10b981', pointerEvents: 'none' }}
                   />
                 </div>
 
-                {/* NHÓM NÚT SỬA/XÓA */}
                 <div style={{ position: 'absolute', top: '8px', right: '10px', display: 'flex', gap: '5px' }}>
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      setEditingId(q.id);
-                      setSelectedSubject(q.subject);
-                      setQText(q.text);
-                      setOptTexts(q.options?.map(o => o.text) || ["", "", "", ""]);
-                      setCorrectIdx(q.options?.findIndex(o => o.is_correct) ?? 0);
+                      startEdit(q);
                     }} 
                     style={{ border: 'none', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', cursor: 'pointer', fontSize: '14px', padding: '6px 10px', borderRadius: '6px', fontWeight: 'bold' }}
                     title="Sửa câu hỏi"
@@ -1165,19 +1147,17 @@ D. Tùy chọn 4`}
                   </button>
                 </div>
 
-                {/* CÂU HỎI */}
                 <p style={{ marginTop: '30px', marginBottom: '12px', paddingRight: '10px', color: '#334155', lineHeight: '1.5' }}>
                   <strong style={{ color: '#0f172a' }}>Câu {index + 1}:</strong> {q.text}
                 </p>
                 
-                {/* ĐÁP ÁN */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '14px' }}>
                   {q.options?.map((opt, i) => (
                     <div 
                       key={i} 
                       style={{ 
                         padding: '8px 12px', 
-                        background: opt.is_correct ? '#ecfdf5' : '#f1f5f9', // Bôi nền xanh cho đáp án đúng
+                        background: opt.is_correct ? '#ecfdf5' : '#f1f5f9', 
                         color: opt.is_correct ? '#059669' : '#475569', 
                         borderRadius: '6px',
                         border: opt.is_correct ? '1px solid #10b981' : '1px solid transparent',

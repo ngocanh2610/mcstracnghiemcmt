@@ -15,10 +15,15 @@ CREATE TABLE IF NOT EXISTS exams (
 
 CREATE TABLE IF NOT EXISTS questions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  exam_id UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
   text TEXT NOT NULL,
   points INT DEFAULT 1,
   created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS exam_questions (
+  exam_id UUID NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+  question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+  PRIMARY KEY (exam_id, question_id)
 );
 
 CREATE TABLE IF NOT EXISTS question_options (
