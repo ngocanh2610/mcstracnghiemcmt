@@ -4,7 +4,7 @@ import { API } from "../config";
 import * as mammoth from "mammoth";
 import * as XLSX from "xlsx";
 
-// --- 1. COMPONENT THỐNG KÊ (Đã fix map Họ tên & Xuất Excel chuẩn) ---
+// --- 1. COMPONENT THỐNG KÊ (Hỗ trợ map Họ tên & Xuất Excel) ---
 export function ExamStats({ token, examId, onClose }) {
   const [st, setSt] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ export function ExamStats({ token, examId, onClose }) {
           });
         }
         setUsersInfo(infoMap);
-      } catch (err) { console.error("Lỗi tải User:", err); }
+      } catch (err) { console.error("Lỗi tải thông tin user:", err); }
     } catch (e) { console.error(e); }
   };
 
@@ -37,11 +37,11 @@ export function ExamStats({ token, examId, onClose }) {
       await axios.post(`${API}/submissions/regrade/${examId}`, {}, { headers: { Authorization: "Bearer " + token } });
       alert("✅ Đã gửi yêu cầu chấm lại hệ thống!");
       setTimeout(() => { loadStats(); setLoading(false); }, 2000);
-    } catch { alert("Lỗi chấm lại!"); setLoading(false); }
+    } catch { alert("Lỗi khi gửi yêu cầu chấm lại!"); setLoading(false); }
   };
 
   const handleExportExcel = () => {
-    if (!st?.details?.length) return alert("Không có dữ liệu!");
+    if (!st?.details?.length) return alert("Không có dữ liệu để xuất!");
     const dataToExport = st.details.map((d, index) => {
       const uInfo = usersInfo[d.user_id] || {};
       return {
@@ -52,35 +52,35 @@ export function ExamStats({ token, examId, onClose }) {
         "Ngày Nộp": new Date(d.created_at).toLocaleString('vi-VN')
       };
     });
-    const ws = XLSX.utils.json_to_sheet(dataToExport);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "ThongKeDiem");
-    XLSX.writeFile(wb, `Thong_Ke_Diem_De_${examId.slice(0,5)}.xlsx`);
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "ThongKeDiem");
+    XLSX.writeFile(workbook, `Thong_Ke_Diem_De_${examId.slice(0,5)}.xlsx`);
   };
 
-  if (!st) return <div style={{ padding: '20px', textAlign: 'center' }}>Đang tải...</div>;
+  if (!st) return <div style={{ padding: '20px', textAlign: 'center' }}>Đang tải dữ liệu...</div>;
 
   return (
     <div className="animate-fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ margin: 0, fontSize: '20px' }}>📊 Thống kê kết quả đề thi</h2>
+        <h2 style={{ margin: 0, fontSize: '20px', color: '#1e293b' }}>📊 Thống kê kết quả đề thi</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn-primary" style={{ background: '#10b981' }} onClick={handleExportExcel}>📥 Xuất Excel</button>
-          <button className="btn-primary" style={{ background: '#f59e0b' }} onClick={handleRegrade} disabled={loading}>{loading ? "⌛..." : "🔄 Chấm lại"}</button>
+          <button className="btn-primary" style={{ background: '#f59e0b' }} onClick={handleRegrade} disabled={loading}>{loading ? "⌛ Đang chấm..." : "🔄 Chấm lại"}</button>
           <button className="btn-outline" onClick={onClose}>⬅ Quay lại</button>
         </div>
       </div>
       <div style={{ display: 'flex', gap: '15px', marginBottom: '25px' }}>
         <div className="stat-card-mini">Tổng thí sinh: <strong>{st.stats.total}</strong></div>
-        <div className="stat-card-mini" style={{ borderLeft: '4px solid #10b981' }}>Trung bình: <strong>{st.stats.avg}</strong></div>
-        <div className="stat-card-mini" style={{ borderLeft: '4px solid #4f46e5' }}>Cao nhất: <strong>{st.stats.max}</strong></div>
+        <div className="stat-card-mini" style={{ borderLeft: '4px solid #10b981' }}>Điểm trung bình: <strong>{st.stats.avg}</strong></div>
+        <div className="stat-card-mini" style={{ borderLeft: '4px solid #4f46e5' }}>Điểm cao nhất: <strong>{st.stats.max}</strong></div>
       </div>
       <table className="history-table" style={{ width: '100%' }}>
         <thead>
           <tr>
             <th>THÍ SINH</th>
-            <th style={{ textAlign: 'center' }}>ĐÚNG</th>
-            <th style={{ textAlign: 'center' }}>ĐIỂM</th>
+            <th style={{ textAlign: 'center' }}>SỐ CÂU ĐÚNG</th>
+            <th style={{ textAlign: 'center' }}>ĐIỂM SỐ</th>
             <th style={{ textAlign: 'right' }}>NGÀY NỘP</th>
           </tr>
         </thead>
@@ -102,7 +102,7 @@ export function ExamStats({ token, examId, onClose }) {
   );
 }
 
-// --- 2. CHỈNH SỬA CÂU HỎI (Hỗ trợ ONBLUR TỰ ĐỘNG LƯU) ---
+// --- 2. CHỈNH SỬA CÂU HỎI TRONG ĐỀ (Hỗ trợ ONBLUR TỰ ĐỘNG LƯU) ---
 export function ExamQuestionEditor({ token, examId, onClose }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -123,10 +123,10 @@ export function ExamQuestionEditor({ token, examId, onClose }) {
     try {
       await axios.patch(`${API}/exams/questions/${qId}/correct-option`, { correctOptionCode: code }, { headers: { Authorization: "Bearer " + token } });
       fetchFullExam();
-    } catch { alert("Lỗi!"); } finally { setLoading(false); }
+    } catch { alert("Lỗi khi sửa đáp án!"); } finally { setLoading(false); }
   };
 
-  if (!data) return <div style={{ padding: '20px', textAlign: 'center' }}>Đang tải đề...</div>;
+  if (!data) return <div style={{ padding: '20px', textAlign: 'center' }}>Đang tải nội dung đề...</div>;
 
   return (
     <div className="animate-fade-in">
@@ -138,7 +138,7 @@ export function ExamQuestionEditor({ token, examId, onClose }) {
         {data.questions.map((q, i) => (
           <div key={q.id} className="card" style={{ padding: '15px', marginBottom: '15px', borderLeft: '4px solid #4f46e5' }}>
             <textarea className="login-input" defaultValue={q.text} onBlur={(e) => handleUpdateText(`${API}/exams/questions/${q.id}`, e.target.value)} style={{ width: '100%', height: '50px' }} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               {q.options.map(opt => (
                 <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: opt.is_correct ? '#f0fdf4' : '#f8fafc', padding: '10px', borderRadius: '6px' }}>
                   <input type="radio" name={`q-${q.id}`} checked={opt.is_correct} onChange={() => updateCorrectAnswer(q.id, opt.code)} disabled={loading} />
@@ -168,7 +168,7 @@ export function ExamManager({ token, me }) {
     try {
       await axios.delete(`${API}/exams/${id}`, { headers: { Authorization: "Bearer " + token } });
       loadExams();
-    } catch { alert("Lỗi xóa đề!"); }
+    } catch { alert("Lỗi khi xóa đề!"); }
   };
 
   return (
@@ -238,7 +238,7 @@ export function TeacherPanel({ token, me, refresh }) {
       <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
         <input className="login-input" style={{ flex: 2 }} placeholder="Tên đề thi" value={title} onChange={e => setTitle(e.target.value)} />
         <select className="login-input" style={{ flex: 1 }} value={subject} onChange={e => setSubject(e.target.value)}>
-          <option value="">-- Chọn môn --</option>
+          <option value="">-- Chọn môn học --</option>
           {subjects.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <input className="login-input" type="number" style={{ width: '80px' }} value={duration} onChange={e => setDuration(e.target.value)} />
@@ -264,7 +264,7 @@ export function TeacherPanel({ token, me, refresh }) {
   );
 }
 
-// --- 5. QUẢN LÝ NGÂN HÀNG (Hỗ trợ REGEX PARSE WORD chuẩn) ---
+// --- 5. NGÂN HÀNG CÂU HỎI (Hỗ trợ TỰ ĐỘNG ĐỌC ĐÁP ÁN từ file Word) ---
 export function QuestionBankManager({ token }) {
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("");
@@ -273,6 +273,7 @@ export function QuestionBankManager({ token }) {
   const [optTexts, setOptTexts] = useState(["", "", "", ""]);
   const [correctIdx, setCorrectIdx] = useState(0);
   const [newSub, setNewSub] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
   const loadQuestions = (sub) => axios.get(`${API}/exams/banks/subject/${sub}`, { headers: { Authorization: "Bearer " + token } }).then(r => setQuestions(r.data));
   const loadSubjects = () => axios.get(`${API}/exams/banks/list/subjects`, { headers: { Authorization: "Bearer " + token } }).then(r => setSubjects(r.data));
@@ -280,82 +281,142 @@ export function QuestionBankManager({ token }) {
   useEffect(() => { loadSubjects(); }, []);
   useEffect(() => { if (selectedSubject) loadQuestions(selectedSubject); }, [selectedSubject]);
 
-  const parseWordFile = async (file) => {
-    const arrayBuffer = await file.arrayBuffer();
-    const result = await mammoth.extractRawText({ arrayBuffer });
-    const lines = result.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    const parsedQs = []; let currentQ = null;
+  const startEdit = (q) => {
+    setEditingId(q.id);
+    setQText(q.text);
+    setOptTexts(q.options?.map(o => o.text) || ["", "", "", ""]);
+    setCorrectIdx(q.options?.findIndex(o => o.is_correct) ?? 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-    lines.forEach(line => {
-      // Regex nhận diện câu hỏi: Câu 1:, Question 1:, 1.
-      if (line.match(/^(Câu\s*\d+:|Question\s*\d+:|^\d+\.)/i)) {
-        if (currentQ) parsedQs.push(currentQ);
-        currentQ = { text: line.replace(/^(Câu\s*\d+:|Question\s*\d+:|^\d+\.)\s*/i, ''), options: [] };
-      } else if (currentQ && line.match(/^[A-D][\.\)]/)) {
-        // Nhận diện đáp án đúng bằng dấu * hoặc chữ (Đúng)
-        const isCorrect = line.includes('*') || line.toLowerCase().includes('(đúng)');
-        currentQ.options.push({ 
-            code: line[0], 
-            text: line.substring(2).replace('*', '').replace(/\(Đúng\)/i, '').trim(), 
-            is_correct: isCorrect 
-        });
-      }
-    });
-    if (currentQ) parsedQs.push(currentQ);
-    return parsedQs;
+  // ✅ HÀM PARSE FILE WORD: TỰ ĐỘNG ĐỌC DÒNG "ĐÁP ÁN: [C]"
+  const parseWordFile = async (file) => {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      // Chia nhỏ nội dung thành từng dòng [cite: 1-31]
+      const lines = result.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      
+      const parsedQs = [];
+      let currentQ = null;
+
+      lines.forEach(line => {
+        // 1. Nhận diện dòng bắt đầu câu hỏi (Ví dụ: "Câu 1: ...") [cite: 2, 8, 14, 20, 26]
+        if (line.match(/^(Câu\s*\d+:|Question\s*\d+:|^\d+\.)/i)) {
+          if (currentQ) parsedQs.push(currentQ);
+          currentQ = { 
+            text: line.replace(/^(Câu\s*\d+:|Question\s*\d+:|^\d+\.)\s*/i, ''), 
+            options: [] 
+          };
+        } 
+        // 2. Nhận diện các lựa chọn (A., B., C., D.) [cite: 3-6, 9-12, 15-18, 21-24, 27-30]
+        else if (currentQ && line.match(/^[A-D][\.\)]/)) {
+          const code = line[0].toUpperCase();
+          const text = line.substring(2).trim();
+          currentQ.options.push({ code, text, is_correct: false });
+        }
+        // 3. ✅ QUAN TRỌNG: Nhận diện dòng "Đáp án: C" [cite: 7, 13, 19, 25, 31]
+        else if (currentQ && line.match(/^Đáp án:\s*([A-D])/i)) {
+          const match = line.match(/^Đáp án:\s*([A-D])/i);
+          const correctLetter = match[1].toUpperCase();
+          
+          // Duyệt qua các option vừa nạp để đánh dấu câu đúng
+          currentQ.options = currentQ.options.map(opt => ({
+            ...opt,
+            is_correct: opt.code === correctLetter
+          }));
+        }
+      });
+      
+      if (currentQ) parsedQs.push(currentQ);
+      return parsedQs;
+    } catch (e) {
+      alert("Lỗi khi đọc file Word!");
+      return [];
+    }
   };
 
   const handleImport = async (e) => {
     const file = e.target.files[0];
     const sub = newSub || selectedSubject;
     if (!file || !sub) return alert("Vui lòng chọn môn và file Word!");
+    
     const qs = await parseWordFile(file);
-    if (!qs.length) return alert("Không tìm thấy câu hỏi hợp lệ!");
-    await axios.post(`${API}/exams/banks-batch`, { subject: sub, questions: qs }, { headers: { Authorization: "Bearer " + token } });
-    alert("✅ Đã import thành công " + qs.length + " câu hỏi!"); loadQuestions(sub);
+    if (!qs.length) return alert("Không tìm thấy câu hỏi hợp lệ trong file!");
+    
+    try {
+      await axios.post(`${API}/exams/banks-batch`, { subject: sub, questions: qs }, { headers: { Authorization: "Bearer " + token } });
+      alert(`✅ Đã import thành công ${qs.length} câu hỏi!`);
+      loadQuestions(sub);
+      e.target.value = ""; // Reset input file
+    } catch {
+      alert("Lỗi khi gửi dữ liệu lên hệ thống!");
+    }
   };
 
-  const addQuestion = async () => {
+  const handleSave = async () => {
     const sub = newSub || selectedSubject;
-    if (!sub || !qText) return alert("Thiếu thông tin!");
-    await axios.post(`${API}/exams/banks`, {
+    if (!sub || !qText) return alert("Vui lòng điền đủ thông tin!");
+    const payload = {
       subject: sub, text: qText,
       options: optTexts.map((t, i) => ({ text: t, code: String.fromCharCode(65 + i), is_correct: i === correctIdx }))
-    }, { headers: { Authorization: "Bearer " + token } });
-    alert("Đã thêm!"); setQText(""); setOptTexts(["", "", "", ""]); loadQuestions(sub);
+    };
+    try {
+      if (editingId) await axios.put(`${API}/exams/banks/${editingId}`, payload, { headers: { Authorization: "Bearer " + token } });
+      else await axios.post(`${API}/exams/banks`, payload, { headers: { Authorization: "Bearer " + token } });
+      alert("✅ Thành công!");
+      setEditingId(null); setQText(""); setOptTexts(["", "", "", ""]);
+      loadSubjects(); loadQuestions(sub);
+    } catch { alert("Lỗi khi lưu câu hỏi!"); }
+  };
+
+  const deleteQs = async (id) => {
+    if (!window.confirm("Xóa câu này khỏi ngân hàng?")) return;
+    try {
+      await axios.delete(`${API}/exams/banks/${id}`, { headers: { Authorization: "Bearer " + token } });
+      loadQuestions(selectedSubject);
+    } catch { alert("Lỗi khi xóa!"); }
   };
 
   return (
     <div style={{ display: 'flex', gap: '20px' }}>
-      <div className="card" style={{ flex: 1, padding: '20px' }}>
-        <h3>Quản lý ngân hàng câu hỏi</h3>
+      <div className="card" style={{ flex: 1, padding: '20px', background: '#fff', border: editingId ? '2px solid #fbbf24' : '1px solid #eee' }}>
+        <h3>{editingId ? "📝 Chỉnh sửa câu hỏi" : "➕ Thêm câu hỏi mới"}</h3>
         <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
-          <select className="login-input" value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
+          <select className="login-input" style={{ flex: 1 }} value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
             <option value="">-- Chọn môn --</option>
             {subjects.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
-          <input className="login-input" placeholder="Hoặc môn mới" onChange={e => setNewSub(e.target.value)} />
+          <input className="login-input" style={{ flex: 1 }} placeholder="Hoặc tạo môn mới..." value={newSub} onChange={e => setNewSub(e.target.value)} />
         </div>
-        <textarea className="login-input" placeholder="Nội dung câu hỏi" value={qText} onChange={e => setQText(e.target.value)} style={{ height: '80px' }} />
+        <textarea className="login-input" placeholder="Nội dung câu hỏi" value={qText} onChange={e => setQText(e.target.value)} style={{ height: '80px', width: '100%' }} />
         {optTexts.map((t, i) => (
-          <div key={i} style={{ display: 'flex', gap: '5px', marginBottom: '5px' }}>
+          <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '8px', alignItems: 'center' }}>
             <input type="radio" checked={correctIdx === i} onChange={() => setCorrectIdx(i)} />
-            <input className="login-input" style={{ margin: 0 }} placeholder={`Đáp án ${String.fromCharCode(65+i)}`} value={t} onChange={e => { const n = [...optTexts]; n[i] = e.target.value; setOptTexts(n); }} />
+            <input className="login-input" style={{ margin: 0, flex: 1 }} placeholder={`Đáp án ${String.fromCharCode(65+i)}`} value={t} onChange={e => { const n = [...optTexts]; n[i] = e.target.value; setOptTexts(n); }} />
           </div>
         ))}
-        <button className="btn-primary" style={{ width: '100%' }} onClick={addQuestion}>Lưu câu hỏi</button>
+        <button className="btn-primary" style={{ width: '100%', marginTop: '10px' }} onClick={handleSave}>{editingId ? "Cập nhật câu hỏi" : "Lưu vào ngân hàng"}</button>
+        {editingId && <button className="btn-outline" style={{ width: '100%', marginTop: '5px' }} onClick={() => setEditingId(null)}>Hủy bỏ sửa</button>}
+        
         <div style={{ marginTop: '20px', border: '2px dashed #3b82f6', padding: '15px', textAlign: 'center', borderRadius: '8px' }}>
           <p style={{ color: '#3b82f6', fontWeight: 'bold' }}>📄 Import từ file Word (.docx)</p>
+          <p style={{ fontSize: '11px', color: '#666', marginBottom: '10px' }}>Hỗ trợ nhận diện "Đáp án: [A/B/C/D]"</p>
           <input type="file" accept=".docx" onChange={handleImport} />
         </div>
       </div>
-      <div className="card" style={{ flex: 1.5, padding: '20px', maxHeight: '650px', overflowY: 'auto' }}>
-        <h3>Danh sách câu hỏi: {selectedSubject}</h3>
+      
+      <div className="card" style={{ flex: 1.5, padding: '20px', maxHeight: '75vh', overflowY: 'auto', background: '#fff' }}>
+        <h3>Danh sách câu hỏi: {selectedSubject || "..."}</h3>
         {questions.map((q, idx) => (
-          <div key={q.id} style={{ marginBottom: '15px', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-            <strong>{idx + 1}. {q.text}</strong>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', fontSize: '13px', marginTop: '5px' }}>
-                {q.options?.map(o => <span key={o.id} style={{ color: o.is_correct ? '#10b981' : '#64748b' }}>{o.code}. {o.text} {o.is_correct && '✅'}</span>)}
+          <div key={q.id} style={{ marginBottom: '15px', padding: '15px', background: '#f8fafc', borderRadius: '10px', position: 'relative', border: '1px solid #eee' }}>
+            <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px' }}>
+              <button onClick={() => startEdit(q)} style={{ background: '#dbeafe', color: '#3b82f6', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>✏️</button>
+              <button onClick={() => deleteQs(q.id)} style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>🗑️</button>
+            </div>
+            <p><strong>Câu {idx + 1}:</strong> {q.text}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', fontSize: '13px' }}>
+                {q.options?.map(o => <span key={o.id} style={{ color: o.is_correct ? '#10b981' : '#64748b', fontWeight: o.is_correct ? 'bold' : 'normal' }}>{o.code}. {o.text} {o.is_correct && '✅'}</span>)}
             </div>
           </div>
         ))}
