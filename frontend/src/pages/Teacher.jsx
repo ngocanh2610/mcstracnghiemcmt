@@ -41,7 +41,7 @@ export function ExamStats({ token, examId, onClose }) {
   };
 
   const handleExportExcel = () => {
-    if (!st?.details?.length) return alert("Không có dữ liệu để xuất!");
+    if (!st?.details?.length) return alert("Không có dữ liệu!");
     const dataToExport = st.details.map((d, index) => {
       const uInfo = usersInfo[d.user_id] || {};
       return {
@@ -55,32 +55,26 @@ export function ExamStats({ token, examId, onClose }) {
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "ThongKeDiem");
-    XLSX.writeFile(workbook, `Thong_Ke_Diem_De_${examId.slice(0,5)}.xlsx`);
+    XLSX.writeFile(workbook, `KetQua_De_${examId.slice(0,5)}.xlsx`);
   };
 
-  if (!st) return <div style={{ padding: '20px', textAlign: 'center' }}>Đang tải dữ liệu...</div>;
-
+  if (!st) return <div style={{ padding: '20px', textAlign: 'center' }}>Đang tải...</div>;
   return (
     <div className="animate-fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ margin: 0, fontSize: '20px', color: '#1e293b' }}>📊 Thống kê kết quả đề thi</h2>
+        <h2 style={{ margin: 0, fontSize: '20px' }}>📊 Thống kê kết quả đề thi</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn-primary" style={{ background: '#10b981' }} onClick={handleExportExcel}>📥 Xuất Excel</button>
-          <button className="btn-primary" style={{ background: '#f59e0b' }} onClick={handleRegrade} disabled={loading}>{loading ? "⌛ Đang chấm..." : "🔄 Chấm lại"}</button>
+          <button className="btn-primary" style={{ background: '#f59e0b' }} onClick={handleRegrade} disabled={loading}>{loading ? "⌛..." : "🔄 Chấm lại"}</button>
           <button className="btn-outline" onClick={onClose}>⬅ Quay lại</button>
         </div>
-      </div>
-      <div style={{ display: 'flex', gap: '15px', marginBottom: '25px' }}>
-        <div className="stat-card-mini">Tổng thí sinh: <strong>{st.stats.total}</strong></div>
-        <div className="stat-card-mini" style={{ borderLeft: '4px solid #10b981' }}>Điểm trung bình: <strong>{st.stats.avg}</strong></div>
-        <div className="stat-card-mini" style={{ borderLeft: '4px solid #4f46e5' }}>Điểm cao nhất: <strong>{st.stats.max}</strong></div>
       </div>
       <table className="history-table" style={{ width: '100%' }}>
         <thead>
           <tr>
             <th>THÍ SINH</th>
-            <th style={{ textAlign: 'center' }}>SỐ CÂU ĐÚNG</th>
-            <th style={{ textAlign: 'center' }}>ĐIỂM SỐ</th>
+            <th style={{ textAlign: 'center' }}>ĐÚNG</th>
+            <th style={{ textAlign: 'center' }}>ĐIỂM</th>
             <th style={{ textAlign: 'right' }}>NGÀY NỘP</th>
           </tr>
         </thead>
@@ -102,7 +96,7 @@ export function ExamStats({ token, examId, onClose }) {
   );
 }
 
-// --- 2. CHỈNH SỬA CÂU HỎI TRONG ĐỀ (Hỗ trợ ONBLUR TỰ ĐỘNG LƯU) ---
+// --- 2. CHỈNH SỬA CÂU HỎI TRONG ĐỀ (Hỗ trợ AUTO-SAVE khi onBlur) ---
 export function ExamQuestionEditor({ token, examId, onClose }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -126,7 +120,7 @@ export function ExamQuestionEditor({ token, examId, onClose }) {
     } catch { alert("Lỗi khi sửa đáp án!"); } finally { setLoading(false); }
   };
 
-  if (!data) return <div style={{ padding: '20px', textAlign: 'center' }}>Đang tải nội dung đề...</div>;
+  if (!data) return <div style={{ padding: '20px', textAlign: 'center' }}>Đang tải đề...</div>;
 
   return (
     <div className="animate-fade-in">
@@ -138,7 +132,7 @@ export function ExamQuestionEditor({ token, examId, onClose }) {
         {data.questions.map((q, i) => (
           <div key={q.id} className="card" style={{ padding: '15px', marginBottom: '15px', borderLeft: '4px solid #4f46e5' }}>
             <textarea className="login-input" defaultValue={q.text} onBlur={(e) => handleUpdateText(`${API}/exams/questions/${q.id}`, e.target.value)} style={{ width: '100%', height: '50px' }} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {q.options.map(opt => (
                 <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: opt.is_correct ? '#f0fdf4' : '#f8fafc', padding: '10px', borderRadius: '6px' }}>
                   <input type="radio" name={`q-${q.id}`} checked={opt.is_correct} onChange={() => updateCorrectAnswer(q.id, opt.code)} disabled={loading} />
@@ -149,112 +143,93 @@ export function ExamQuestionEditor({ token, examId, onClose }) {
           </div>
         ))}
       </div>
-      <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>💡 Hệ thống tự động lưu khi bạn nhập xong và nhấn chuột ra ngoài.</p>
     </div>
   );
 }
 
-// --- 3. QUẢN LÝ ĐỀ THI ---
+// --- 3. QUẢN LÝ ĐỀ THI (KHÓA QUYỀN SỬA CHO ADMIN) ---
 export function ExamManager({ token, me }) {
   const [exams, setExams] = useState([]);
-  const [activeView, setActiveView] = useState('list');
-  const [selectedId, setSelectedId] = useState(null);
+  const [view, setView] = useState('list');
+  const [id, setId] = useState(null);
 
-  const loadExams = () => axios.get(`${API}/exams`, { headers: { Authorization: "Bearer " + token } }).then(r => setExams(r.data));
-  useEffect(() => { loadExams(); }, [token]);
+  const load = () => axios.get(`${API}/exams`, { headers: { Authorization: "Bearer " + token } }).then(r => setExams(r.data));
+  useEffect(() => { load(); }, [token]);
 
-  const deleteExam = async (id) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa đề thi này?")) return;
-    try {
-      await axios.delete(`${API}/exams/${id}`, { headers: { Authorization: "Bearer " + token } });
-      loadExams();
-    } catch { alert("Lỗi khi xóa đề!"); }
-  };
+  // ✅ Kiểm tra quyền Admin
+  const isAdmin = me.roles?.some(r => r.toLowerCase() === 'admin');
 
   return (
     <div className="card" style={{ padding: '20px' }}>
-      {activeView === 'stats' ? <ExamStats token={token} examId={selectedId} onClose={() => setActiveView('list')} /> :
-       activeView === 'edit' ? <ExamQuestionEditor token={token} examId={selectedId} onClose={() => setActiveView('list')} /> :
-       <>
-         <h3 style={{ marginBottom: '20px' }}>Quản lý đề thi của bạn</h3>
-         <table className="history-table" style={{ width: '100%' }}>
-            <thead><tr><th>TÊN ĐỀ</th><th>MÔN</th><th style={{ textAlign: 'center' }}>HÀNH ĐỘNG</th></tr></thead>
-            <tbody>
-              {exams.map(ex => (
-                <tr key={ex.id}>
-                  <td><strong>{ex.title}</strong></td>
-                  <td>{ex.subject}</td>
-                  <td style={{ textAlign: 'center' }}>
-                    <button className="btn-primary" style={{ background: '#10b981', padding: '5px 10px' }} onClick={() => { setSelectedId(ex.id); setActiveView('stats'); }}>📊</button>
-                    <button className="btn-primary" style={{ background: '#3b82f6', padding: '5px 10px', marginLeft: '5px' }} onClick={() => { setSelectedId(ex.id); setActiveView('edit'); }}>✏️</button>
-                    <button className="btn-primary" style={{ background: '#ef4444', padding: '5px 10px', marginLeft: '5px' }} onClick={() => deleteExam(ex.id)}>🗑️</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-         </table>
-       </>
+      {view === 'stats' ? <ExamStats token={token} examId={id} onClose={() => setView('list')} /> :
+       view === 'edit' ? <ExamQuestionEditor token={token} examId={id} onClose={() => setView('list')} /> :
+       <table className="history-table" style={{ width: '100%' }}>
+         <thead><tr><th>TÊN ĐỀ</th><th>MÔN</th><th style={{ textAlign: 'center' }}>HÀNH ĐỘNG</th></tr></thead>
+         <tbody>
+           {exams.map(ex => (
+             <tr key={ex.id}>
+               <td><strong>{ex.title}</strong></td><td>{ex.subject}</td>
+               <td style={{ textAlign: 'center' }}>
+                 <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+                    <button className="btn-primary" style={{ background: '#10b981', padding: '5px 10px' }} onClick={() => { setId(ex.id); setView('stats'); }}>📊 Thống kê</button>
+                    
+                    {/* ✅ CHỈ GIÁO VIÊN MỚI THẤY NÚT SỬA */}
+                    {!isAdmin && (
+                      <button className="btn-primary" style={{ background: '#3b82f6', padding: '5px 10px' }} onClick={() => { setId(ex.id); setView('edit'); }}>✏️ Sửa câu</button>
+                    )}
+
+                    <button className="btn-primary" style={{ background: '#ef4444', padding: '5px 10px' }} onClick={async () => { if(window.confirm("Xóa đề?")) { await axios.delete(`${API}/exams/${ex.id}`, { headers: { Authorization: "Bearer " + token } }); load(); } }}>🗑️ Xóa</button>
+                 </div>
+               </td>
+             </tr>
+           ))}
+         </tbody>
+       </table>
       }
     </div>
   );
 }
 
-// --- 4. TẠO ĐỀ THI (Hỗ trợ CHỌN NGẪU NHIÊN từ ngân hàng) ---
+// --- 4. TẠO ĐỀ THI (Hỗ trợ CHỌN NGẪU NHIÊN) ---
 export function TeacherPanel({ token, me, refresh }) {
-  const [title, setTitle] = useState("");
-  const [subject, setSubject] = useState("");
-  const [duration, setDuration] = useState(60);
+  const [form, setForm] = useState({ title: "", subject: "", duration: 60 });
   const [subjects, setSubjects] = useState([]);
-  const [bankQuestions, setBankQuestions] = useState([]);
-  const [selectedQs, setSelectedQs] = useState([]);
-  const [randomCount, setRandomCount] = useState(5);
+  const [bank, setBank] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [rand, setRand] = useState(5);
 
-  useEffect(() => {
-    axios.get(`${API}/exams/banks/list/subjects`, { headers: { Authorization: "Bearer " + token } }).then(r => setSubjects(r.data));
-  }, [token]);
+  useEffect(() => { axios.get(`${API}/exams/banks/list/subjects`, { headers: { Authorization: "Bearer " + token } }).then(r => setSubjects(r.data)); }, [token]);
+  useEffect(() => { if (form.subject) axios.get(`${API}/exams/banks/subject/${form.subject}`, { headers: { Authorization: "Bearer " + token } }).then(r => setBank(r.data)); }, [form.subject]);
 
-  useEffect(() => {
-    if (subject) axios.get(`${API}/exams/banks/subject/${subject}`, { headers: { Authorization: "Bearer " + token } }).then(r => setBankQuestions(r.data));
-  }, [subject]);
-
-  const handleSaveExam = async () => {
-    if (!title || !subject || !selectedQs.length) return alert("Vui lòng điền đủ thông tin!");
+  const handleSave = async () => {
+    if (!form.title || !form.subject || !selected.length) return alert("Thiếu thông tin!");
     try {
-      const res = await axios.post(`${API}/exams`, { title, subject, duration, created_by: me.id }, { headers: { Authorization: "Bearer " + token } });
-      const qs = bankQuestions.filter(q => selectedQs.includes(q.id));
+      const res = await axios.post(`${API}/exams`, { ...form, created_by: me.id }, { headers: { Authorization: "Bearer " + token } });
+      const qs = bank.filter(q => selected.includes(q.id));
       await axios.post(`${API}/exams/${res.data.id}/questions-batch`, { questions: qs }, { headers: { Authorization: "Bearer " + token } });
-      alert("🚀 Tạo đề thi thành công!"); refresh();
-    } catch { alert("Lỗi khi lưu đề!"); }
-  };
-
-  const pickRandom = () => {
-    const shuffled = [...bankQuestions].sort(() => 0.5 - Math.random());
-    setSelectedQs(shuffled.slice(0, randomCount).map(q => q.id));
+      alert("Tạo đề thành công!"); refresh();
+    } catch { alert("Lỗi!"); }
   };
 
   return (
     <div className="card" style={{ padding: '20px' }}>
       <h3>🚀 Soạn đề thi mới</h3>
       <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-        <input className="login-input" style={{ flex: 2 }} placeholder="Tên đề thi" value={title} onChange={e => setTitle(e.target.value)} />
-        <select className="login-input" style={{ flex: 1 }} value={subject} onChange={e => setSubject(e.target.value)}>
-          <option value="">-- Chọn môn học --</option>
+        <input className="login-input" style={{ flex: 2 }} placeholder="Tên đề" onChange={e => setForm({ ...form, title: e.target.value })} />
+        <select className="login-input" style={{ flex: 1 }} onChange={e => setForm({ ...form, subject: e.target.value })}>
+          <option value="">-- Môn --</option>
           {subjects.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <input className="login-input" type="number" style={{ width: '80px' }} value={duration} onChange={e => setDuration(e.target.value)} />
-        <button className="btn-primary" onClick={handleSaveExam}>Lưu đề</button>
+        <button className="btn-primary" onClick={handleSave}>Lưu đề</button>
       </div>
-      {subject && (
+      {form.subject && (
         <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '10px' }}>
-          <div style={{ marginBottom: '15px' }}>
-            🎲 Lấy ngẫu nhiên <input type="number" style={{ width: '60px' }} value={randomCount} onChange={e => setRandomCount(e.target.value)} /> câu 
-            <button className="btn-outline" style={{ marginLeft: '10px', padding: '5px 15px' }} onClick={pickRandom}>Thực hiện</button>
-          </div>
-          <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
-            {bankQuestions.map(q => (
-              <label key={q.id} style={{ display: 'flex', gap: '10px', padding: '8px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer' }}>
-                <input type="checkbox" checked={selectedQs.includes(q.id)} onChange={() => setSelectedQs(prev => prev.includes(q.id) ? prev.filter(i => i !== q.id) : [...prev, q.id])} />
-                <span>{q.text}</span>
+          🎲 Lấy ngẫu nhiên <input type="number" style={{ width: '50px' }} value={rand} onChange={e => setRand(e.target.value)} /> câu 
+          <button onClick={() => setSelected(bank.sort(() => 0.5 - Math.random()).slice(0, rand).map(q => q.id))} style={{ marginLeft: '10px' }}>Thực hiện</button>
+          <div style={{ maxHeight: '300px', overflowY: 'auto', marginTop: '10px' }}>
+            {bank.map(q => (
+              <label key={q.id} style={{ display: 'block', padding: '5px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={selected.includes(q.id)} onChange={() => setSelected(prev => prev.includes(q.id) ? prev.filter(i => i !== q.id) : [...prev, q.id])} /> {q.text}
               </label>
             ))}
           </div>
@@ -264,159 +239,125 @@ export function TeacherPanel({ token, me, refresh }) {
   );
 }
 
-// --- 5. NGÂN HÀNG CÂU HỎI (Hỗ trợ TỰ ĐỘNG ĐỌC ĐÁP ÁN từ file Word) ---
+// --- 5. NGÂN HÀNG CÂU HỎI (BẢN FIX TRIỆT ĐỂ LỖI IMPORT WORD) ---
 export function QuestionBankManager({ token }) {
   const [subjects, setSubjects] = useState([]);
-  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedSub, setSelectedSub] = useState("");
   const [questions, setQuestions] = useState([]);
   const [qText, setQText] = useState("");
-  const [optTexts, setOptTexts] = useState(["", "", "", ""]);
-  const [correctIdx, setCorrectIdx] = useState(0);
+  const [opts, setOpts] = useState(["", "", "", ""]);
+  const [correct, setCorrect] = useState(0);
   const [newSub, setNewSub] = useState("");
-  const [editingId, setEditingId] = useState(null);
+  const [editId, setEditId] = useState(null);
 
-  const loadQuestions = (sub) => axios.get(`${API}/exams/banks/subject/${sub}`, { headers: { Authorization: "Bearer " + token } }).then(r => setQuestions(r.data));
-  const loadSubjects = () => axios.get(`${API}/exams/banks/list/subjects`, { headers: { Authorization: "Bearer " + token } }).then(r => setSubjects(r.data));
+  const loadQs = (s) => axios.get(`${API}/exams/banks/subject/${s}`, { headers: { Authorization: "Bearer " + token } }).then(r => setQuestions(r.data));
+  const loadSubs = () => axios.get(`${API}/exams/banks/list/subjects`, { headers: { Authorization: "Bearer " + token } }).then(r => setSubjects(r.data));
 
-  useEffect(() => { loadSubjects(); }, []);
-  useEffect(() => { if (selectedSubject) loadQuestions(selectedSubject); }, [selectedSubject]);
+  useEffect(() => { loadSubs(); }, []);
+  useEffect(() => { if (selectedSub) loadQs(selectedSub); }, [selectedSub]);
 
-  const startEdit = (q) => {
-    setEditingId(q.id);
-    setQText(q.text);
-    setOptTexts(q.options?.map(o => o.text) || ["", "", "", ""]);
-    setCorrectIdx(q.options?.findIndex(o => o.is_correct) ?? 0);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  // ✅ HÀM PARSE FIX LỖI SỐ 3 (Chặt đuôi A. B. C. D dính vào câu hỏi)
+  const parseWord = async (file) => {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    const lines = result.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const parsed = []; let current = null;
 
-  // ✅ HÀM PARSE FILE WORD: TỰ ĐỘNG ĐỌC DÒNG "ĐÁP ÁN: [C]"
-  const parseWordFile = async (file) => {
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const result = await mammoth.extractRawText({ arrayBuffer });
-      // Chia nhỏ nội dung thành từng dòng [cite: 1-31]
-      const lines = result.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      
-      const parsedQs = [];
-      let currentQ = null;
+    lines.forEach(line => {
+      // 1. Nhận diện tiêu đề câu hỏi
+      if (line.match(/^(Câu\s*\d+:|Question\s*\d+:|^\d+\.)/i)) {
+        if (current) parsed.push(current);
+        let text = line.replace(/^(Câu\s*\d+:|Question\s*\d+:|^\d+\.)\s*/i, '');
+        
+        // 🔥 FIX LỖI SỐ 3: Cắt bỏ phần đáp án bị dính vào câu hỏi
+        const optionPos = text.search(/\s+[A-D][\.\)]/);
+        if (optionPos !== -1) { text = text.substring(0, optionPos).trim(); }
 
-      lines.forEach(line => {
-        // 1. Nhận diện dòng bắt đầu câu hỏi (Ví dụ: "Câu 1: ...") [cite: 2, 8, 14, 20, 26]
-        if (line.match(/^(Câu\s*\d+:|Question\s*\d+:|^\d+\.)/i)) {
-          if (currentQ) parsedQs.push(currentQ);
-          currentQ = { 
-            text: line.replace(/^(Câu\s*\d+:|Question\s*\d+:|^\d+\.)\s*/i, ''), 
-            options: [] 
-          };
-        } 
-        // 2. Nhận diện các lựa chọn (A., B., C., D.) [cite: 3-6, 9-12, 15-18, 21-24, 27-30]
-        else if (currentQ && line.match(/^[A-D][\.\)]/)) {
-          const code = line[0].toUpperCase();
-          const text = line.substring(2).trim();
-          currentQ.options.push({ code, text, is_correct: false });
-        }
-        // 3. ✅ QUAN TRỌNG: Nhận diện dòng "Đáp án: C" [cite: 7, 13, 19, 25, 31]
-        else if (currentQ && line.match(/^Đáp án:\s*([A-D])/i)) {
-          const match = line.match(/^Đáp án:\s*([A-D])/i);
-          const correctLetter = match[1].toUpperCase();
-          
-          // Duyệt qua các option vừa nạp để đánh dấu câu đúng
-          currentQ.options = currentQ.options.map(opt => ({
-            ...opt,
-            is_correct: opt.code === correctLetter
-          }));
-        }
-      });
-      
-      if (currentQ) parsedQs.push(currentQ);
-      return parsedQs;
-    } catch (e) {
-      alert("Lỗi khi đọc file Word!");
-      return [];
-    }
+        current = { text, options: [] };
+      } 
+      // 2. Nhận diện các Option A, B, C, D
+      else if (current && line.match(/^[A-D][\.\)]/)) {
+        current.options.push({ code: line[0].toUpperCase(), text: line.substring(2).trim(), is_correct: false });
+      }
+      // 3. Nhận diện dòng "Đáp án: X"
+      else if (current && line.match(/^Đáp án:\s*([A-D])/i)) {
+        const match = line.match(/^Đáp án:\s*([A-D])/i);
+        const correctLetter = match[1].toUpperCase();
+        current.options = current.options.map(o => ({ ...o, is_correct: o.code === correctLetter }));
+      }
+    });
+    if (current) parsed.push(current);
+    return parsed;
   };
 
   const handleImport = async (e) => {
-    const file = e.target.files[0];
-    const sub = newSub || selectedSubject;
-    if (!file || !sub) return alert("Vui lòng chọn môn và file Word!");
-    
-    const qs = await parseWordFile(file);
-    if (!qs.length) return alert("Không tìm thấy câu hỏi hợp lệ trong file!");
-    
-    try {
-      await axios.post(`${API}/exams/banks-batch`, { subject: sub, questions: qs }, { headers: { Authorization: "Bearer " + token } });
-      alert(`✅ Đã import thành công ${qs.length} câu hỏi!`);
-      loadQuestions(sub);
-      e.target.value = ""; // Reset input file
-    } catch {
-      alert("Lỗi khi gửi dữ liệu lên hệ thống!");
-    }
+    const sub = newSub || selectedSub;
+    if (!sub || !e.target.files[0]) return alert("Vui lòng chọn môn và file!");
+    const qs = await parseWord(e.target.files[0]);
+    if (!qs.length) return alert("Không tìm thấy câu hỏi hợp lệ!");
+    await axios.post(`${API}/exams/banks-batch`, { subject: sub, questions: qs }, { headers: { Authorization: "Bearer " + token } });
+    alert("✅ Import thành công!"); loadQs(sub);
+    e.target.value = "";
+  };
+
+  const startEdit = (q) => {
+    setEditId(q.id); setQText(q.text);
+    setOpts(q.options?.map(o => o.text) || ["", "", "", ""]);
+    setCorrect(q.options?.findIndex(o => o.is_correct) ?? 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSave = async () => {
-    const sub = newSub || selectedSubject;
-    if (!sub || !qText) return alert("Vui lòng điền đủ thông tin!");
-    const payload = {
-      subject: sub, text: qText,
-      options: optTexts.map((t, i) => ({ text: t, code: String.fromCharCode(65 + i), is_correct: i === correctIdx }))
-    };
+    const sub = newSub || selectedSub;
+    if (!sub || !qText) return alert("Thiếu thông tin!");
+    const payload = { subject: sub, text: qText, options: opts.map((t, i) => ({ text: t, code: String.fromCharCode(65 + i), is_correct: i === correct })) };
     try {
-      if (editingId) await axios.put(`${API}/exams/banks/${editingId}`, payload, { headers: { Authorization: "Bearer " + token } });
+      if (editId) await axios.put(`${API}/exams/banks/${editId}`, payload, { headers: { Authorization: "Bearer " + token } });
       else await axios.post(`${API}/exams/banks`, payload, { headers: { Authorization: "Bearer " + token } });
-      alert("✅ Thành công!");
-      setEditingId(null); setQText(""); setOptTexts(["", "", "", ""]);
-      loadSubjects(); loadQuestions(sub);
-    } catch { alert("Lỗi khi lưu câu hỏi!"); }
-  };
-
-  const deleteQs = async (id) => {
-    if (!window.confirm("Xóa câu này khỏi ngân hàng?")) return;
-    try {
-      await axios.delete(`${API}/exams/banks/${id}`, { headers: { Authorization: "Bearer " + token } });
-      loadQuestions(selectedSubject);
-    } catch { alert("Lỗi khi xóa!"); }
+      alert("Đã lưu!"); setEditId(null); setQText(""); setOpts(["", "", "", ""]); loadQs(sub);
+    } catch { alert("Lỗi!"); }
   };
 
   return (
     <div style={{ display: 'flex', gap: '20px' }}>
-      <div className="card" style={{ flex: 1, padding: '20px', background: '#fff', border: editingId ? '2px solid #fbbf24' : '1px solid #eee' }}>
-        <h3>{editingId ? "📝 Chỉnh sửa câu hỏi" : "➕ Thêm câu hỏi mới"}</h3>
+      <div className="card" style={{ flex: 1, padding: '20px', background: '#fff', border: editId ? '2px solid #fbbf24' : '1px solid #eee' }}>
+        <h3>{editId ? "📝 Sửa câu hỏi" : "➕ Thêm mới"}</h3>
+        
+        {/* Hồi phục phần chọn môn */}
         <div style={{ display: 'flex', gap: '5px', marginBottom: '10px' }}>
-          <select className="login-input" style={{ flex: 1 }} value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
-            <option value="">-- Chọn môn --</option>
+          <select className="login-input" style={{ flex: 1 }} value={selectedSub} onChange={e => setSelectedSub(e.target.value)}>
+            <option value="">-- Môn --</option>
             {subjects.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
-          <input className="login-input" style={{ flex: 1 }} placeholder="Hoặc tạo môn mới..." value={newSub} onChange={e => setNewSub(e.target.value)} />
+          <input className="login-input" style={{ flex: 1 }} placeholder="Môn mới" value={newSub} onChange={e => setNewSub(e.target.value)} />
         </div>
-        <textarea className="login-input" placeholder="Nội dung câu hỏi" value={qText} onChange={e => setQText(e.target.value)} style={{ height: '80px', width: '100%' }} />
-        {optTexts.map((t, i) => (
-          <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '8px', alignItems: 'center' }}>
-            <input type="radio" checked={correctIdx === i} onChange={() => setCorrectIdx(i)} />
-            <input className="login-input" style={{ margin: 0, flex: 1 }} placeholder={`Đáp án ${String.fromCharCode(65+i)}`} value={t} onChange={e => { const n = [...optTexts]; n[i] = e.target.value; setOptTexts(n); }} />
+
+        <textarea className="login-input" placeholder="Nội dung" value={qText} onChange={e => setQText(e.target.value)} style={{ height: '80px' }} />
+        {opts.map((t, i) => (
+          <div key={i} style={{ display: 'flex', gap: '5px', marginBottom: '5px' }}>
+            <input type="radio" checked={correct === i} onChange={() => setCorrect(i)} />
+            <input className="login-input" style={{ margin: 0, flex: 1 }} value={t} onChange={e => { const n = [...opts]; n[i] = e.target.value; setOpts(n); }} />
           </div>
         ))}
-        <button className="btn-primary" style={{ width: '100%', marginTop: '10px' }} onClick={handleSave}>{editingId ? "Cập nhật câu hỏi" : "Lưu vào ngân hàng"}</button>
-        {editingId && <button className="btn-outline" style={{ width: '100%', marginTop: '5px' }} onClick={() => setEditingId(null)}>Hủy bỏ sửa</button>}
-        
-        <div style={{ marginTop: '20px', border: '2px dashed #3b82f6', padding: '15px', textAlign: 'center', borderRadius: '8px' }}>
-          <p style={{ color: '#3b82f6', fontWeight: 'bold' }}>📄 Import từ file Word (.docx)</p>
-          <p style={{ fontSize: '11px', color: '#666', marginBottom: '10px' }}>Hỗ trợ nhận diện "Đáp án: [A/B/C/D]"</p>
+        <button className="btn-primary" style={{ width: '100%', marginTop: '10px' }} onClick={handleSave}>💾 Lưu câu hỏi</button>
+        {editId && <button className="btn-outline" style={{ width: '100%', marginTop: '5px' }} onClick={() => setEditId(null)}>Hủy sửa</button>}
+        <div style={{ marginTop: '20px', border: '1px dashed #3b82f6', padding: '15px', textAlign: 'center', borderRadius: '8px' }}>
+          <p style={{ color: '#3b82f6', fontWeight: 'bold' }}>📄 Import Word (.docx)</p>
           <input type="file" accept=".docx" onChange={handleImport} />
         </div>
       </div>
-      
-      <div className="card" style={{ flex: 1.5, padding: '20px', maxHeight: '75vh', overflowY: 'auto', background: '#fff' }}>
-        <h3>Danh sách câu hỏi: {selectedSubject || "..."}</h3>
+
+      <div className="card" style={{ flex: 1.5, padding: '20px', maxHeight: '75vh', overflowY: 'auto' }}>
+        <h3>Ngân hàng: {selectedSub}</h3>
         {questions.map((q, idx) => (
           <div key={q.id} style={{ marginBottom: '15px', padding: '15px', background: '#f8fafc', borderRadius: '10px', position: 'relative', border: '1px solid #eee' }}>
             <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '5px' }}>
-              <button onClick={() => startEdit(q)} style={{ background: '#dbeafe', color: '#3b82f6', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>✏️</button>
-              <button onClick={() => deleteQs(q.id)} style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>🗑️</button>
+              <button onClick={() => startEdit(q)} style={{ background: '#dbeafe', color: '#3b82f6', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>✏️</button>
+              <button onClick={async () => { if (window.confirm("Xóa?")) { await axios.delete(`${API}/exams/banks/${q.id}`, { headers: { Authorization: "Bearer " + token } }); loadQs(selectedSub); } }} style={{ background: '#fee2e2', color: '#ef4444', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}>🗑️</button>
             </div>
             <p><strong>Câu {idx + 1}:</strong> {q.text}</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', fontSize: '13px' }}>
-                {q.options?.map(o => <span key={o.id} style={{ color: o.is_correct ? '#10b981' : '#64748b', fontWeight: o.is_correct ? 'bold' : 'normal' }}>{o.code}. {o.text} {o.is_correct && '✅'}</span>)}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', fontSize: '13px' }}>
+                {q.options?.map(o => <span key={o.id} style={{ color: o.is_correct ? 'green' : '#666' }}>{o.code}. {o.text} {o.is_correct && '✅'}</span>)}
             </div>
           </div>
         ))}
