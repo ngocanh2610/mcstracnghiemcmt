@@ -27,42 +27,57 @@ app.use((req, res, next) => {
 
 // --- 1.1 ENDPOINT NỘP BÀI (POST /) ---
 app.post("/", async (req, res) => {
+    // 1. Nhận dữ liệu từ Frontend khi học sinh bấm "Nộp bài"
     const { exam_id, user_id, answers, duration_seconds } = req.body;
+    
+    // Kiểm tra dữ liệu: Thiếu ID đề, ID học sinh hoặc bộ đáp án thì chặn lại ngay
     if (!exam_id || !user_id || !answers) return res.status(400).json({ error: "Dữ liệu thiếu" });
 
     try {
+        // 2. GIAO TIẾP MICROSERVICES: Gọi sang Exam Service để lấy ĐÁP ÁN GỐC
         const examRes = await http.get(`${EXAM_SERVICE_URL}/internal/${exam_id}/answers`);
         const questions = examRes.data.questions;
 
+        // 3. THUẬT TOÁN CHẤM ĐIỂM TỰ ĐỘNG
         let correct_count = 0;
         questions.forEach((q: any) => {
+            // Tìm ra đáp án đúng của câu hỏi hiện tại từ dữ liệu gốc
             const correctOption = q.options.find((opt: any) => opt.is_correct === true);
+            // Lấy đáp án mà học sinh đã chọn (ví dụ: "A", "B")
             const studentAnswer = answers[q.id];
+            
             if (correctOption && studentAnswer) {
+                // So sánh đáp án: Dùng toString(), trim() và toUpperCase() để đảm bảo 
+                // không bị sai lệch do khoảng trắng hay chữ hoa/chữ thường (ví dụ " a " vẫn tính là đúng bằng "A").
                 if (studentAnswer.toString().trim().toUpperCase() === correctOption.code.toString().trim().toUpperCase()) {
-                    correct_count++;
+                    correct_count++; // Nếu khớp thì cộng 1 câu đúng
                 }
             }
         });
 
+        // 4. Tính điểm thang 10: 
         const score = questions.length > 0 ? Math.round((correct_count / questions.length) * 10 * 100) / 100 : 0;
 
-        // KIỂM TRA: ĐÃ CÓ BẢN NHÁP (draft) DO AUTOSAVE TẠO CHƯA?
+        // 5. XỬ LÝ DATABASE: NỐI TIẾP LOGIC CỦA AUTOSAVE (LƯU NHÁP)
         let submissionId;
+        // Kiểm tra xem hệ thống có đang lưu giữ bản nháp (draft) nào của học sinh này không
         const checkDraft = await pool.query(
             "SELECT id FROM submissions WHERE exam_id = $1 AND user_id = $2 AND status = 'draft' ORDER BY created_at DESC LIMIT 1",
             [exam_id, user_id]
         );
 
         if (checkDraft.rows.length > 0) {
-            // Có bản nháp -> Ghi đè đáp án cuối cùng và ĐỔI TRẠNG THÁI THÀNH 'completed'
+            // TÌNH HUỐNG A: Có bản nháp
+            // Update ghi đè bộ đáp án cuối cùng, cập nhật thời gian làm bài, 
+            // và quan trọng nhất: ĐỔI TRẠNG THÁI (status) thành 'completed' (Đã hoàn thành).
             submissionId = checkDraft.rows[0].id;
             await pool.query(
                 "UPDATE submissions SET answers = $1, duration_seconds = $2, status = 'completed' WHERE id = $3",
                 [JSON.stringify(answers), duration_seconds || 0, submissionId]
             );
         } else {
-            // Chưa có bản nháp -> Tạo dòng mới cứng với status 'completed'
+            // TÌNH HUỐNG B: Không có bản nháp (Trường hợp học sinh làm quá nhanh, hoặc lỗi mạng nên autosave chưa kịp chạy)
+            // Tạo hẳn một bản ghi mới toanh, chốt luôn trạng thái là 'completed'.
             const result = await pool.query(
                 "INSERT INTO submissions (exam_id, user_id, answers, duration_seconds, status, created_at) VALUES ($1, $2, $3, $4, 'completed', NOW()) RETURNING id",
                 [exam_id, user_id, JSON.stringify(answers), duration_seconds || 0]
@@ -70,13 +85,16 @@ app.post("/", async (req, res) => {
             submissionId = result.rows[0].id;
         }
 
-        // Gửi điểm sang Result Service (Chạy ngầm)
+        // 6. GIAO TIẾP MICROSERVICES LẦN 2: BẮN ĐIỂM SANG RESULT SERVICE (EVENT-DRIVEN CƠ BẢN)
         http.post(`${RESULT_SERVICE_URL}/`, {
             submission_id: submissionId, exam_id, user_id, correct_count, total_questions: questions.length, score
         }).catch(err => console.error("!!! Lỗi gửi điểm:", err.message));
 
+        // 7. Hoàn tất: Trả về HTTP 201 cùng số điểm nóng hổi cho Frontend hiển thị.
         res.status(201).json({ message: "Nộp bài thành công", submission_id: submissionId, score });
+        
     } catch (err: any) {
+        // 8. Bắt lỗi tổng
         console.error("!!! Lỗi nộp bài:", err.message);
         res.status(500).json({ error: "Lỗi hệ thống khi nộp bài" });
     }
@@ -84,31 +102,45 @@ app.post("/", async (req, res) => {
 
 // --- 1.2 ENDPOINT LƯU NHÁP (POST /autosave) ---
 app.post("/autosave", async (req, res) => {
+    // 1. Nhận dữ liệu: Lấy ID đề thi, ID học sinh, bộ đáp án đang chọn dở và thời gian đã trôi qua
     const { exam_id, user_id, answers, duration_seconds } = req.body;
+    
+    // 2. Kiểm tra hợp lệ: Bắt buộc phải có định danh đề thi và người dùng
     if (!exam_id || !user_id) return res.status(400).json({ error: "Thiếu exam_id hoặc user_id" });
 
     try {
-        // Tìm xem học sinh này có ĐANG làm dở bản nháp nào không (status = 'draft')
+        // 3. Kiểm tra bài thi dở dang (Draft Check):
+        // Tìm trong Database xem học sinh này có đang làm dở cái đề này không.
+        // Chỉ tìm những bản ghi có trạng thái là 'draft' (đang nháp). Nếu đã 'submitted' (đã nộp) thì bỏ qua.
+        // Dùng 'ORDER BY created_at DESC LIMIT 1' để đề phòng lỗi có nhiều bản nháp, ta lấy bản nháp mới nhất.
         const checkDraft = await pool.query(
             "SELECT id FROM submissions WHERE exam_id = $1 AND user_id = $2 AND status = 'draft' ORDER BY created_at DESC LIMIT 1",
             [exam_id, user_id]
         );
 
         if (checkDraft.rows.length > 0) {
-            // Đã có nháp -> Chỉ Cập nhật (UPDATE)
+            // 4A. Đã có nháp -> Cập nhật (UPDATE)
+            // Lấy id của bản nháp tìm được và đè bộ đáp án mới nhất (answers) cùng thời gian làm bài (duration_seconds) lên.
+            // Dùng JSON.stringify() để chuyển đổi Object đáp án thành chuỗi JSON trước khi lưu vào PostgreSQL.
             await pool.query(
                 "UPDATE submissions SET answers = $1, duration_seconds = $2 WHERE id = $3",
                 [JSON.stringify(answers || {}), duration_seconds || 0, checkDraft.rows[0].id]
             );
         } else {
-            // Chưa có nháp -> Thêm mới (INSERT) với status là 'draft'
+            // 4B. Chưa có nháp -> Tạo mới (INSERT)
+            // Lần đầu tiên hệ thống tự động lưu, nó sẽ tạo ra một record hoàn toàn mới 
+            // Gắn cứng status là 'draft' để đánh dấu đây là bài đang làm, chưa phải kết quả cuối.
             await pool.query(
                 "INSERT INTO submissions (exam_id, user_id, answers, duration_seconds, status, created_at) VALUES ($1, $2, $3, $4, 'draft', NOW())",
                 [exam_id, user_id, JSON.stringify(answers || {}), duration_seconds || 0]
             );
         }
+
+        // 5. Trả về thành công
         res.status(200).json({ message: "Đã lưu nháp" });
+        
     } catch (err: any) {
+        // 6. Xử lý lỗi: Ghi log lỗi ra console Server để dễ debug và trả về lỗi 500 cho Frontend
         console.error("!!! Lỗi lưu nháp:", err.message);
         res.status(500).json({ error: err.message });
     }

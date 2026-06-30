@@ -9,6 +9,19 @@
             "name": "Auth_DB",
             "database": "auth_db",
             "username": "postgres"
+        },
+        {
+            "pgOptions": {
+                "ssl": {
+                    "rejectUnauthorized": true
+                }
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "driver": "PostgreSQL",
+            "connectString": "postgresql://neondb_owner:npg_pBf2geFZOaH9@ep-orange-unit-ao811px6.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require",
+            "name": "Neon Cloud"
         }
     ]
 }

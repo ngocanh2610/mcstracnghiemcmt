@@ -88,24 +88,44 @@ router.post("/", checkRole(['teacher', 'admin']), async (req, res) => {
     } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
-// 3.1 Lấy chi tiết đề (Thí sinh làm bài)
+// --- 3.1 Lấy chi tiết đề (Thí sinh làm bài) ---
 router.get("/:id", async (req, res) => {
+    // 1. Lấy ID đề thi: Trích xuất tham số 'id' từ trên URL (Ví dụ: /exams/123 -> id = 123)
     const { id } = req.params;
-    if (id === 'internal') return; // Tránh nhầm lẫn với route internal
+
+    // 2. Chặn xung đột Route: 
+    // Nếu URL là /exams/internal, ta phải bỏ qua (return) để Express nhường quyền xử lý 
+    // cho một route khác có tên là /internal/... (thường dùng để lấy cả đáp án cho Giám khảo hoặc Server tự chấm).
+    if (id === 'internal') return; 
+
     try {
+        // 3. Lấy thông tin chung của đề thi: (Tên đề, môn học, thời gian làm bài,...)
         const examRes = await pool.query("SELECT * FROM exams WHERE id = $1", [id]);
+        
+        // Nếu không tìm thấy đề thi nào khớp với ID này, trả về lỗi 404 Not Found.
         if (examRes.rows.length === 0) return res.status(404).json({ error: "Không tìm thấy đề" });
+
+        // 4. Lấy Danh sách Câu hỏi và Đáp án (BẢO MẬT CAO):
         const questionsRes = await pool.query(`
             SELECT q.id, q.text, q.points, 
-                   COALESCE(json_agg(json_build_object('id', o.id, 'code', o.code, 'text', o.text) ORDER BY o.code) 
-                   FILTER (WHERE o.id IS NOT NULL), '[]') as options
             FROM questions q 
             LEFT JOIN question_options o ON q.id = o.question_id
             WHERE q.id IN (SELECT question_id FROM exam_questions WHERE exam_id = $1)
             GROUP BY q.id ORDER BY q.id ASC
         `, [id]);
-        res.json({ exam: examRes.rows[0], questions: questionsRes.rows });
-    } catch (err: any) { res.status(500).json({ error: err.message }); }
+
+        // 5. Gộp dữ liệu và Trả về:
+        // Đóng gói thông tin chung của đề (exam) và mảng các câu hỏi kèm đáp án (questions) 
+        // thành một JSON duy nhất bắn về cho Frontend hiển thị giao diện làm bài.
+        res.json({ 
+            exam: examRes.rows[0], 
+            questions: questionsRes.rows 
+        });
+
+    } catch (err: any) {
+        // 6. Xử lý ngoại lệ: Nếu DB bị lỗi hoặc query sai, bắt lỗi và trả về HTTP 500 (Internal Server Error)
+        res.status(500).json({ error: err.message }); 
+    }
 });
 
 // 3.2 Lấy chi tiết đề kèm đáp án (Dùng cho Review/Sửa đề)

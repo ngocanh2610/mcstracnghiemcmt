@@ -199,7 +199,6 @@ app.put("/change-password", async (req: Request, res: Response) => {
 
     try {
         // 2. Xác thực Token (Verify): Dùng chìa khóa bí mật (JWT_SECRET) để kiểm tra xem token này có hợp lệ không, có bị sửa đổi hay hết hạn chưa.
-        // Ép kiểu 'as MyJwtPayload' để TypeScript hiểu rằng sau khi giải mã, ta sẽ có được 'payload.id' của người dùng.
         const payload = jwt.verify(token, JWT_SECRET) as MyJwtPayload;
         
         // 3. Lấy dữ liệu: Trích xuất mật khẩu cũ và mật khẩu mới do Frontend gửi lên trong req.body.
@@ -213,7 +212,6 @@ app.put("/change-password", async (req: Request, res: Response) => {
         if (!user) return res.status(404).json({ message: "User không tồn tại" });
 
         // 5. Xác minh Mật khẩu cũ: Dùng hàm 'bcrypt.compare' để so sánh 'oldPassword' người dùng nhập vào với cái 'password_hash' đang lưu.
-        // Việc này cực kỳ quan trọng để đảm bảo chính chủ đang thao tác chứ không phải ai đó mượn máy tính khi chưa đăng xuất.
         const isMatch = await bcrypt.compare(oldPassword, user.password_hash);
         if (!isMatch) return res.status(400).json({ message: "Mật khẩu cũ không đúng" });
 
