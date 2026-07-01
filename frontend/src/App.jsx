@@ -40,7 +40,7 @@ function Login({ onLogin, onSwitchRegister }) {
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
-        <h2>Welcome Back</h2>
+        <h2>testCICD</h2>
         <input className="login-input" placeholder="Tên đăng nhập hoặc email" value={u} onChange={e => setU(e.target.value)} required />
         <input className="login-input" type="password" placeholder="Mật khẩu" value={p} onChange={e => setP(e.target.value)} required />
 
