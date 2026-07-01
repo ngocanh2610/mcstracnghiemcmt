@@ -11,10 +11,10 @@ export function ProfileSettings({ token, user }) {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) return alert("Mật khẩu mới không khớp!");
-    
+
     setLoading(true);
     try {
-      await axios.put(`${API}/auth/change-password`, 
+      await axios.put(`${API}/auth/change-password`,
         { oldPassword, newPassword },
         { headers: { Authorization: "Bearer " + token } }
       );
@@ -41,16 +41,16 @@ export function ProfileSettings({ token, user }) {
         </div>
       </div>
 
-      <div className="exam-palette-panel" style={{width: '400px'}}>
-        <h4 style={{marginBottom: '15px'}}>Đổi mật khẩu</h4>
-        <form onSubmit={handleChangePassword} style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-          <input className="login-input" style={{margin: 0}} type="password" placeholder="Mật khẩu cũ" 
-                 value={oldPassword} onChange={e => setOldPassword(e.target.value)} required />
-          <input className="login-input" style={{margin: 0}} type="password" placeholder="Mật khẩu mới" 
-                 value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
-          <input className="login-input" style={{margin: 0}} type="password" placeholder="Xác nhận mật khẩu mới" 
-                 value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
-          <button type="submit" className="btn-primary" style={{width: '100%', marginTop: '5px'}} disabled={loading}>
+      <div className="exam-palette-panel" style={{ width: '400px' }}>
+        <h4 style={{ marginBottom: '15px' }}>Đổi mật khẩu</h4>
+        <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <input className="login-input" style={{ margin: 0 }} type="password" placeholder="Mật khẩu cũ"
+            value={oldPassword} onChange={e => setOldPassword(e.target.value)} required />
+          <input className="login-input" style={{ margin: 0 }} type="password" placeholder="Mật khẩu mới"
+            value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+          <input className="login-input" style={{ margin: 0 }} type="password" placeholder="Xác nhận mật khẩu mới"
+            value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+          <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '5px' }} disabled={loading}>
             {loading ? "Đang xử lý..." : "Cập nhật mật khẩu"}
           </button>
         </form>
