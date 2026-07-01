@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { API } from "../config";
 
-export function Login({ onLogin, onSwitchRegister }) { 
+export function Login({ onLogin, onSwitchRegister }) {
   const [u, setU] = useState(localStorage.getItem("savedUsername") || "");
   const [p, setP] = useState(localStorage.getItem("savedPassword") || "");
   const [rememberMe, setRememberMe] = useState(!!localStorage.getItem("savedUsername"));
@@ -23,19 +23,19 @@ export function Login({ onLogin, onSwitchRegister }) {
         localStorage.removeItem("savedPassword");
       }
       onLogin(r.data.access_token);
-    } catch (err) { 
-      alert("Đăng nhập thất bại! Kiểm tra lại tài khoản hoặc mật khẩu."); 
-    } finally { 
-      setLoading(false); 
+    } catch (err) {
+      alert("Đăng nhập thất bại! Kiểm tra lại tài khoản hoặc mật khẩu.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
-        <div style={{marginBottom: '30px'}}>
-           <h2 style={{margin: '0 0 10px 0', color: '#1e293b', fontSize: '28px'}}>Welcome Back</h2>
-           <p style={{margin: 0, color: '#64748b', fontSize: '15px'}}>Đăng nhập để tiếp tục hệ thống.</p>
+        <div style={{ marginBottom: '30px' }}>
+          <h2 style={{ margin: '0 0 10px 0', color: '#1e293b', fontSize: '28px' }}>CICD</h2>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '15px' }}>Đăng nhập để tiếp tục hệ thống.</p>
         </div>
 
         <input className="login-input" placeholder="Tên đăng nhập" value={u} onChange={e => setU(e.target.value)} required />
@@ -66,13 +66,13 @@ export function Login({ onLogin, onSwitchRegister }) {
             {showPassword ? '👁️' : '🙈'}
           </span>
         </div>
-        
+
         <div className="login-options">
           <label className="remember-me">
-            <input 
-              type="checkbox" 
-              checked={rememberMe} 
-              onChange={(e) => setRememberMe(e.target.checked)} 
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
             />
             <span>Ghi nhớ đăng nhập</span>
           </label>
@@ -84,7 +84,7 @@ export function Login({ onLogin, onSwitchRegister }) {
         <button type="submit" className="btn-primary login-btn" disabled={loading}>
           {loading ? "Đang xử lý..." : "Đăng nhập"}
         </button>
-        
+
         <p style={{ marginTop: '25px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
           Chưa có tài khoản? <span style={{ color: '#4f46e5', cursor: 'pointer', fontWeight: 'bold' }} onClick={onSwitchRegister}>Tạo tài khoản</span>
         </p>
@@ -93,15 +93,15 @@ export function Login({ onLogin, onSwitchRegister }) {
       {showForgotModal && (
         <div className="custom-modal-overlay">
           <div className="custom-modal-content">
-            <h3 style={{margin: '0 0 10px 0', color: '#1e293b', fontSize: '20px'}}>Khôi phục mật khẩu</h3>
-            <p style={{color: '#64748b', fontSize: '14px', marginBottom: '20px', lineHeight: '1.5'}}>
+            <h3 style={{ margin: '0 0 10px 0', color: '#1e293b', fontSize: '20px' }}>Khôi phục mật khẩu</h3>
+            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '20px', lineHeight: '1.5' }}>
               Vui lòng nhập địa chỉ email liên kết với tài khoản của bạn. Chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.
             </p>
-            <input className="login-input" type="email" placeholder="Nhập email của bạn..." style={{marginBottom: '20px'}} />
-            <div style={{display: 'flex', gap: '10px'}}>
-              <button 
-                className="btn-primary" 
-                style={{flex: 1}} 
+            <input className="login-input" type="email" placeholder="Nhập email của bạn..." style={{ marginBottom: '20px' }} />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                className="btn-primary"
+                style={{ flex: 1 }}
                 onClick={() => {
                   alert("Hệ thống đã ghi nhận yêu cầu. Vui lòng kiểm tra hộp thư đến!");
                   setShowForgotModal(false);
@@ -109,7 +109,7 @@ export function Login({ onLogin, onSwitchRegister }) {
               >
                 Gửi yêu cầu
               </button>
-              <button className="btn-outline" style={{flex: 1}} onClick={() => setShowForgotModal(false)}>
+              <button className="btn-outline" style={{ flex: 1 }} onClick={() => setShowForgotModal(false)}>
                 Hủy bỏ
               </button>
             </div>
@@ -128,7 +128,7 @@ export function Register({ onSwitch }) {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -141,7 +141,7 @@ export function Register({ onSwitch }) {
       alert("Đăng ký thành công!"); onSwitch();
     } catch (err) { setError("Lỗi đăng ký!"); }
   }
-  
+
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
@@ -200,9 +200,9 @@ export function Register({ onSwitch }) {
             {showConfirmPassword ? '👁️' : '🙈'}
           </span>
         </div>
-        {error && <div style={{color: 'red', marginBottom: 10, fontSize: 14}}>{error}</div>}
+        {error && <div style={{ color: 'red', marginBottom: 10, fontSize: 14 }}>{error}</div>}
         <button type="submit" className="btn-primary login-btn">Đăng ký ngay</button>
-        <p style={{marginTop: '15px', textAlign: 'center'}}>Đã có tài khoản? <span style={{color: '#4f46e5', cursor: 'pointer', fontWeight: 'bold'}} onClick={onSwitch}>Đăng nhập</span></p>
+        <p style={{ marginTop: '15px', textAlign: 'center' }}>Đã có tài khoản? <span style={{ color: '#4f46e5', cursor: 'pointer', fontWeight: 'bold' }} onClick={onSwitch}>Đăng nhập</span></p>
       </form>
     </div>
   );
