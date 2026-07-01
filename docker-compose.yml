@@ -1,0 +1,161 @@
+services:
+  # --- 1. API GATEWAY ---
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - JWT_SECRET=BuiNamKhanh_SecretKey_BaoVeDoAn2026
+      - AUTH_URL=http://auth-service:3001
+      - USER_URL=http://user-service:3002
+      - EXAM_URL=http://exam-service:3003
+      - SUBMISSION_URL=http://submission-service:3004
+      - RESULT_URL=http://result-service:3005
+    depends_on:
+      - auth-service
+      - user-service
+    networks:
+      - exam-network
+
+  # --- 2. AUTH SERVICE & DB ---
+  auth-db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432" # Để SQLTools kết nối được
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+      - ./sql/auth:/docker-entrypoint-initdb.d
+    networks:
+      - exam-network
+
+  auth-service:
+    build: ./services/auth-service
+    environment:
+      - PORT=3001
+      - DATABASE_URL=postgresql://postgres:postgres@auth-db:5432/auth_db
+      - JWT_SECRET=BuiNamKhanh_SecretKey_BaoVeDoAn2026
+    depends_on:
+      - auth-db
+    networks:
+      - exam-network
+
+  # --- 3. USER SERVICE & DB ---
+  user-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+      - ./sql/user:/docker-entrypoint-initdb.d
+    networks:
+      - exam-network
+
+  user-service:
+    build: ./services/user-service
+    environment:
+      - PORT=3002
+      - DATABASE_URL=postgresql://postgres:postgres@user-db:5432/user_db
+    depends_on:
+      - user-db
+    networks:
+      - exam-network
+
+  exam-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: exam_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - exam-db-data:/var/lib/postgresql/data
+      - ./sql/exam:/docker-entrypoint-initdb.d
+    networks:
+      - exam-network
+
+  exam-service:
+    build: ./services/exam-service
+    environment:
+      - PORT=3003
+      - DATABASE_URL=postgresql://postgres:postgres@exam-db:5432/exam_db
+      - SUBMISSION_SERVICE_URL=http://submission-service:3004
+    depends_on:
+      - exam-db
+    networks:
+      - exam-network
+
+  # --- 4. SUBMISSION SERVICE & DB ---
+  submission-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: submission_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - submission-db-data:/var/lib/postgresql/data
+      - ./sql/submission:/docker-entrypoint-initdb.d
+    networks:
+      - exam-network
+
+  submission-service:
+    build: ./services/submission-service
+    environment:
+      - PORT=3004
+      - DATABASE_URL=postgresql://postgres:postgres@submission-db:5432/submission_db
+      - JWT_SECRET=BuiNamKhanh_SecretKey_BaoVeDoAn2026
+      - EXAM_SERVICE_URL=http://exam-service:3003
+      - RESULT_SERVICE_URL=http://result-service:3005
+    depends_on:
+      - submission-db
+    networks:
+      - exam-network
+
+  # --- 5. RESULT SERVICE & DB ---
+  result-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: result_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - result-db-data:/var/lib/postgresql/data
+      - ./sql/result:/docker-entrypoint-initdb.d
+    networks:
+      - exam-network
+
+  result-service:
+    build: ./services/result-service
+    environment:
+      - PORT=3005
+      - DATABASE_URL=postgresql://postgres:postgres@result-db:5432/result_db
+    depends_on:
+      - result-db
+    networks:
+      - exam-network
+
+  # --- 6. FRONTEND ---
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api-gateway
+    networks:
+      - exam-network
+
+networks:
+  exam-network:
+    driver: bridge
+
+volumes:
+  auth-db-data:
+  user-db-data:
+  exam-db-data:
+  submission-db-data:
+  result-db-data:

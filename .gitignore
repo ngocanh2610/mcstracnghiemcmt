@@ -1,0 +1,26 @@
+# Bỏ qua thư viện Node.js (nó sẽ tự cài lại khi gõ npm install)
+node_modules/
+**/node_modules/
+
+# Bỏ qua thư mục build của React và TypeScript
+dist/
+build/
+.next/
+
+# Bỏ qua dữ liệu của Database (tránh lộ thông tin và làm nặng Git)
+*/auth-db-data/
+*/exam-db-data/
+*/submission-db-data/
+*/result-db-data/
+pgdata/
+
+# Bỏ qua các file môi trường chứa mật khẩu (Bảo mật)
+.env
+.env.local
+
+# Bỏ qua file log và cấu hình hệ điều hành
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db

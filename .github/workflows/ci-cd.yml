@@ -1,0 +1,48 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    name: Build & Test Microservices
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: ⚙️ Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install docker-compose -y
+
+      - name: 🛠️ Build all Docker images
+        run: |
+          # Build toàn bộ các microservices để đảm bảo không có lỗi syntax/build
+          docker-compose build
+
+      - name: ✅ Run tests (Placeholder)
+        run: |
+          echo "Build thành công! Nếu có viết Unit Test, hãy cấu hình chạy lệnh test tại đây."
+
+  # === 2. JOB DEPLOY (CONTINUOUS DEPLOYMENT) ===
+  deploy:
+    name: Deploy to Local Server
+    needs: build
+    runs-on: self-hosted
+    # Chỉ chạy deploy khi code được push vào nhánh main
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+      - name: 🚀 Run Docker Compose
+        run: |
+          docker-compose up -d --build
