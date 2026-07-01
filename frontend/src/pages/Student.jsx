@@ -111,6 +111,15 @@ export function StudentHistory({ token, exams }) {
 
   return (
     <div className="exam-box">
+      
+      {/* --- DÁN ĐOẠN CODE CỦA BẠN VÀO ĐÂY --- */}
+      <div className="student-welcome" style={{ borderLeft: '5px solid #10b981', padding: '15px', background: '#ecfdf5', margin: '20px 0', borderRadius: '8px' }}>
+          <h2 style={{ color: '#047857' }}>🎓 Xin chào Tân Sinh Viên!</h2>
+          <p>Chào mừng bạn đến với hệ thống thi trắc nghiệm. Chúc bạn đạt điểm cao!</p>
+          <i style={{ color: '#6ee7b7' }}>(Giao diện phát triển bởi Nam Anh)</i>
+      </div>
+      {/* ------------------------------------- */}
+
       <h3>Lịch sử thi</h3>
       {loading ? <p>Đang tải lịch sử...</p> : (
         <table className="history-table">
