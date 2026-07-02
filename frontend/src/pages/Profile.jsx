@@ -10,7 +10,7 @@ export function ProfileSettings({ token, user }) {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    if (newPassword !== confirmPassword) return alert("Mật khẩu mới không khớp!");
+    if (newPassword !== confirmPassword) return alert("Mật khẩu mới không khớp");
 
     setLoading(true);
     try {
