@@ -193,7 +193,7 @@ function Main({ token, onLogout }) {
           <div className="animate-fade-in" style={{ textAlign: 'center', padding: '40px' }}>
                  <div className="welcome-banner" style={{ background: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '30px', borderRadius: '15px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
          <h1 style={{ margin: 0, fontSize: '32px' }}>🏆 Chào mừng {me.full_name} đến với Hệ thống thi!</h1>
-         <p style={{ fontSize: '18px', marginTop: '10px' }}>Hãy tự tin thể hiện bản lĩnh của mình nhé! (Giao diện màu xanh biển bởi Khánh)</p>
+         <p style={{ fontSize: '18px', marginTop: '10px' }}>Hãy tự tin thể hiện bản lĩnh của mình nhé! (Đây là Giao diện màu xanh biển bởi Khánh)</p>
      </div>  
 
             <p>Hôm nay bạn muốn thực hiện thử thách nào?</p>
