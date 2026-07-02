@@ -32,7 +32,7 @@ function Login({ onLogin, onSwitchRegister }) {
       }
       onLogin(r.data.access_token);
     } catch (err) {
-      alert("Đăng nhập thất bại! Bạn vui lòng kiểm tra lại tài khoản hoặc mật khẩu.");
+      alert("Xin lỗi bạn, bạn đã đăng nhập thất bại! Bạn vui lòng kiểm tra lại tài khoản hoặc mật khẩu.");
     } finally { setLoading(false); }
   }
 
@@ -171,7 +171,7 @@ function Main({ token, onLogout }) {
   return (
     <div className="modern-layout">
       <div className="modern-sidebar">
-        <div className="sidebar-brand">🎓 THI TRẮC NGHIỆM</div>
+        <div className="sidebar-brand">🎓 THI TRẮC NGHIỆM UTT </div>
         <div className="sidebar-user">
           <div style={{ fontWeight: 'bold' }}>{me.full_name || me.username}</div>
           <div style={{ fontSize: '11px', color: '#64748b' }}>{roles.join(", ").toUpperCase()}</div>
