@@ -2,6 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { API } from "../config";
 
+// Shared UI style presets to keep buttons and controls consistent
+const UI = {
+  button: { padding: '10px 14px', minWidth: '140px', height: '40px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' },
+  outline: { padding: '8px 12px', minWidth: '120px', height: '38px', borderRadius: '8px', background: '#fff', border: '1px solid #e5e7eb', cursor: 'pointer', fontSize: '14px' },
+  paletteBox: { width: '40px', height: '40px', margin: '4px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, cursor: 'pointer', background: '#fff', border: '1px solid #e5e7eb' }
+};
+
 // --- 1. COMPONENT DASHBOARD & TÌM KIẾM (MỚI THÊM) ---
 export function StudentDashboard({ token, exams, onTakeExam }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,7 +37,7 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
     <div className="dashboard-container">
       {/* KHỐI THỐNG KÊ */}
       <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: '250px', padding: '20px', background: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1, minWidth: '250px', minHeight: '110px', padding: '20px', background: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h4 style={{ margin: '0 0 5px 0', color: '#1e3a8a' }}>Tổng số đề thi</h4>
             <p style={{ margin: 0, fontSize: '14px', color: '#3b82f6' }}>Hiện có trên hệ thống</p>
@@ -38,7 +45,7 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
           <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#1d4ed8' }}>{exams.length}</span>
         </div>
 
-        <div style={{ flex: 1, minWidth: '250px', padding: '20px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1, minWidth: '250px', minHeight: '110px', padding: '20px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h4 style={{ margin: '0 0 5px 0', color: '#14532d' }}>Số đề đã thử sức</h4>
             <p style={{ margin: 0, fontSize: '14px', color: '#22c55e' }}>Đã hoàn thành ít nhất 1 lần</p>
@@ -72,9 +79,7 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
               </div>
               <button 
                 onClick={() => onTakeExam(exam.id)}
-                style={{ width: '100%', padding: '10px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'background 0.2s' }}
-                onMouseOver={(e) => e.target.style.background = '#2563eb'}
-                onMouseOut={(e) => e.target.style.background = '#3b82f6'}
+                style={{ ...UI.button, background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', width: '100%' }}
               >
                 📝 Bắt đầu làm bài
               </button>
@@ -132,7 +137,7 @@ export function StudentHistory({ token, exams }) {
                 <td style={{fontWeight:'bold', color: h.score === null ? '#d97706' : '#16a34a'}}>{h.score !== null ? `${h.score}đ` : "Đang chấm..."}</td>
                 <td>
                   {h.score !== null && (
-                    <button className="btn-outline" style={{padding: '4px 10px', fontSize: '13px'}} onClick={() => setReviewId(h.id)}>
+                    <button className="btn-outline" style={{ ...UI.outline, padding: '4px 10px', fontSize: '13px' }} onClick={() => setReviewId(h.id)}>
                       👁️ Xem bài làm
                     </button>
                   )}
@@ -344,13 +349,13 @@ export function ExamTake({ token, examId, me, onClose }) {
       <div className="exam-container-wide">
         <div className="exam-take-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <button className="btn-outline" onClick={handleExit} style={{ padding: '6px 12px', fontSize: '14px', border: 'none', background: '#fee2e2', color: '#ef4444' }}>
+              <button className="btn-outline" onClick={handleExit} style={{ ...UI.outline, padding: '6px 12px', fontSize: '14px', border: 'none', background: '#fee2e2', color: '#ef4444' }}>
                 ⬅ Thoát
               </button>
               <h3 style={{ margin: 0 }}>{data.exam.title}</h3>
             </div>
-            <div className={`timer ${timeLeft < 60 ? 'warning' : ''}`}>
-                ⏳ {Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2, '0')}
+            <div className={`timer ${timeLeft !== null && timeLeft < 60 ? 'warning' : ''}`}>
+                {timeLeft !== null ? `⏳ ${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2, '0')}` : '⏳ --:--'}
             </div>
         </div>
         <div className="exam-layout-split">
@@ -367,32 +372,32 @@ export function ExamTake({ token, examId, me, onClose }) {
                   </div>
                   <div className="options-list">
                     {q.options.map(opt => (
-                      <label key={opt.id} className="option-item">
-                        <input type="radio" name={q.id} onChange={() => setAnswers({...answers, [q.id]: opt.code})} checked={answers[q.id] === opt.code} />
-                        <span>{opt.text}</span>
-                      </label>
+                      <label key={opt.id} className="option-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', borderRadius: '6px', background: '#fafafa', border: '1px solid #f1f5f9' }}>
+                          <input type="radio" name={q.id} onChange={() => setAnswers({...answers, [q.id]: opt.code})} checked={answers[q.id] === opt.code} />
+                          <span>{opt.text}</span>
+                        </label>
                     ))}
                   </div>
                 </div>
               );
             })}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button className="btn-outline" disabled={currentPage === 0} onClick={() => { setCurrentPage(p => p - 1); window.scrollTo(0,0); }}>⬅ Trang trước</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', alignItems: 'center' }}>
+              <button className="btn-outline" style={{ ...UI.outline }} disabled={currentPage === 0} onClick={() => { setCurrentPage(p => p - 1); window.scrollTo(0,0); }}>⬅ Trang trước</button>
               <span>Trang {currentPage + 1} / {totalPages}</span>
-              <button className="btn-outline" disabled={currentPage === totalPages - 1} onClick={() => { setCurrentPage(p => p + 1); window.scrollTo(0,0); }}>Trang sau ➡</button>
+              <button className="btn-outline" style={{ ...UI.outline }} disabled={currentPage === totalPages - 1} onClick={() => { setCurrentPage(p => p + 1); window.scrollTo(0,0); }}>Trang sau ➡</button>
             </div>
           </div>
           <div className="exam-palette-panel">
             <h4>Tiến độ</h4>
             <div className="palette-grid">
               {data.questions.map((q, i) => (
-                <button key={q.id} className={`palette-box ${answers[q.id] ? 'answered' : ''}`} onClick={() => scrollToQuestion(i)} style={{ border: flagged[q.id] ? '2px solid #ef4444' : '' }}>
+                <button key={q.id} className={`palette-box ${answers[q.id] ? 'answered' : ''}`} onClick={() => scrollToQuestion(i)} style={{ ...UI.paletteBox, border: flagged[q.id] ? '2px solid #ef4444' : UI.paletteBox.border, background: answers[q.id] ? '#d1fae5' : UI.paletteBox.background }}>
                   {i + 1}
                 </button>
               ))}
             </div>
             <div style={{marginTop: '25px'}}>
-              <button className="btn-primary" onClick={() => submit(false)} disabled={isSubmitting} style={{width:'100%'}}>
+              <button className="btn-primary" onClick={() => submit(false)} disabled={isSubmitting} style={{ ...UI.button, width: '100%', background: '#10b981', color: '#fff', border: 'none' }}>
                 {isSubmitting ? "Đang xử lý..." : "Nộp bài ngay"}
               </button>
             </div>
