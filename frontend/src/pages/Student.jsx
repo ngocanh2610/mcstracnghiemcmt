@@ -13,6 +13,9 @@ const UI = {
 export function StudentDashboard({ token, exams, onTakeExam }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [attemptedCount, setAttemptedCount] = useState(0);
+  const [favorites, setFavorites] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('favExams') || '[]'); } catch { return []; }
+  });
 
   // Tính số đề đã làm từ lịch sử thi
   useEffect(() => {
@@ -32,6 +35,14 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
     const matchSubject = e.subject && e.subject.toLowerCase().includes(keyword); 
     return matchTitle || matchSubject;
   });
+
+  const toggleFavorite = (examId) => {
+    setFavorites(prev => {
+      const next = prev.includes(examId) ? prev.filter(id => id !== examId) : [...prev, examId];
+      try { localStorage.setItem('favExams', JSON.stringify(next)); } catch {};
+      return next;
+    });
+  };
 
   return (
     <div className="dashboard-container">
@@ -71,9 +82,14 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
           filteredExams.map(exam => (
             <div key={exam.id} style={{ padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', border: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
-                <span style={{ display: 'inline-block', padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', marginBottom: '10px' }}>
-                  {exam.subject || "Thi trắc nghiệm"}
-                </span>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ display: 'inline-block', padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                    {exam.subject || "Thi trắc nghiệm"}
+                  </span>
+                  <button onClick={() => toggleFavorite(exam.id)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '18px', color: favorites.includes(exam.id) ? '#f59e0b' : '#9ca3af' }} aria-label="favorite">
+                    {favorites.includes(exam.id) ? '★' : '☆'}
+                  </button>
+                </div>
                 <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', color: '#111827' }}>{exam.title}</h3>
                 <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#6b7280' }}>⏱ Thời gian: {exam.duration} phút</p>
               </div>
@@ -96,10 +112,20 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
 }
 
 // --- 2. COMPONENT LỊCH SỬ THI ---
-export function StudentHistory({ token, exams }) {
+export function StudentHistory({ token, exams, onTakeExam }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reviewId, setReviewId] = useState(null);
+
+  const downloadCSV = () => {
+    if (!history || history.length === 0) { alert('Không có lịch sử để tải xuống'); return; }
+    const rows = [['exam_title','date','score']];
+    history.forEach(h => rows.push([exams.find(e => e.id === h.exam_id)?.title || 'Đề đã xóa', new Date(h.created_at).toLocaleString(), h.score === null ? '' : h.score]));
+    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'history.csv'; a.click(); URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     axios.get(`${API}/submissions/my`, { headers: { Authorization: "Bearer " + token } })
@@ -126,6 +152,13 @@ export function StudentHistory({ token, exams }) {
       {/* ------------------------------------- */}
 
       <h3>Lịch sử thi</h3>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+        <button style={{ ...UI.outline }} onClick={downloadCSV}>⬇️ Tải lịch sử (CSV)</button>
+        {onTakeExam && <button style={{ ...UI.outline }} onClick={() => {
+          const last = history.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
+          if (last) onTakeExam(last.exam_id); else alert('Không có lịch sử để làm lại');
+        }}>🔁 Làm lại lần gần nhất</button>}
+      </div>
       {loading ? <p>Đang tải lịch sử...</p> : (
         <table className="history-table">
           <thead><tr><th>Đề thi</th><th>Ngày làm</th><th>Điểm</th><th>Hành động</th></tr></thead>
@@ -339,6 +372,22 @@ export function ExamTake({ token, examId, me, onClose }) {
     setFlagged(prev => ({ ...prev, [qId]: !prev[qId] }));
   };
 
+  const clearDraft = async () => {
+    if (!window.confirm('Xác nhận xóa bản nháp cho đề thi này?')) return;
+    try {
+      await axios.delete(`${API}/submissions/draft/${examId}/${me.id}`, { headers: { Authorization: "Bearer " + token } });
+      setAnswers({});
+      setTimeLeft(data ? data.exam.duration * 60 : null);
+      alert('Đã xóa bản nháp. Mở lại đề thi để làm mới.');
+    } catch (err) { console.error(err); alert('Xóa nháp thất bại'); }
+  };
+
+  const goToNextUnanswered = () => {
+    const idx = data.questions.findIndex(q => !answers[q.id]);
+    if (idx === -1) { alert('Không còn câu chưa làm'); return; }
+    scrollToQuestion(idx);
+  };
+
   if (!data) return <div className="exam-take-overlay"><div style={{padding: '50px', textAlign: 'center'}}>Đang tải đề thi...</div></div>;
 
   const totalPages = Math.ceil(data.questions.length / QUESTIONS_PER_PAGE);
@@ -397,9 +446,15 @@ export function ExamTake({ token, examId, me, onClose }) {
               ))}
             </div>
             <div style={{marginTop: '25px'}}>
-              <button className="btn-primary" onClick={() => submit(false)} disabled={isSubmitting} style={{ ...UI.button, width: '100%', background: '#10b981', color: '#fff', border: 'none' }}>
-                {isSubmitting ? "Đang xử lý..." : "Nộp bài ngay"}
-              </button>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="btn-primary" onClick={() => submit(false)} disabled={isSubmitting} style={{ ...UI.button, flex: 1, background: '#10b981', color: '#fff', border: 'none' }}>
+                  {isSubmitting ? "Đang xử lý..." : "Nộp bài ngay"}
+                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '140px' }}>
+                  <button style={{ ...UI.outline }} onClick={goToNextUnanswered}>➡ Câu chưa làm</button>
+                  <button style={{ ...UI.outline, background: '#fff7ed', color: '#b45309' }} onClick={clearDraft}>🗑️ Xóa nháp</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
