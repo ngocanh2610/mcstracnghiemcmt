@@ -97,7 +97,7 @@ function Register({ onSwitch }) {
         username: form.u, password: form.p, email: form.email, full_name: form.fn
       });
       alert("Đăng ký thành công!"); onSwitch();
-    } catch (err) { setError("Lỗi đăng ký!"); }
+    } catch (err) { setError("Lỗi!"); }
   }
 
   return (
