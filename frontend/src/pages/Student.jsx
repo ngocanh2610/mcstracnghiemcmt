@@ -113,63 +113,7 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
 
 
 
-// --- 3. COMPONENT XEM LẠI BÀI ĐÃ LÀM ---
-export function ExamReview({ token, submissionId, onClose }) {
-  const [data, setData] = useState(null);
 
-  useEffect(() => {
-    axios.get(`${API}/submissions/review/${submissionId}`, { headers: { Authorization: "Bearer " + token } })
-      .then(r => setData(r.data))
-      .catch(() => { alert("Lỗi tải chi tiết bài làm!"); onClose(); });
-  }, [submissionId, token]);
-
-  if (!data) return <div className="exam-take-overlay">Đang tải dữ liệu bài làm...</div>;
-
-  return (
-    <div className="exam-take-overlay">
-      <div className="exam-box" style={{width: '90%', maxWidth: '800px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', padding: '0'}}>
-        <div style={{display:'flex', justifyContent:'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #e5e7eb', background: '#f9fafb', borderRadius: '8px 8px 0 0'}}>
-          <h3 style={{margin: 0, color: '#1f2937'}}>Chi tiết bài làm: {data.title}</h3>
-          <button className="btn-logout" onClick={onClose}>Đóng</button>
-        </div>
-        <div style={{padding: '20px', overflowY: 'auto'}}>
-          {data.review.map((q, i) => (
-            <div key={q.id} className="question-card" style={{borderLeft: `5px solid ${q.isCorrect ? '#10b981' : '#ef4444'}`, marginBottom: '20px', padding: '15px', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.1)'}}>
-              <p style={{fontSize: '16px', marginBottom: '15px'}}>
-                <strong>Câu {i+1}:</strong> {q.text} 
-                <span style={{marginLeft: '10px', fontSize: '14px', fontWeight: 'bold', color: q.isCorrect ? '#10b981' : '#ef4444'}}>
-                  {q.isCorrect ? "✅ Đúng" : "❌ Sai"}
-                </span>
-              </p>
-              <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                {q.options.map(opt => {
-                  let bg = "#f9fafb";
-                  let border = "1px solid #e5e7eb";
-                  let fw = "normal";
-
-                  if (opt.code === q.correctChoice) {
-                    bg = "#d1fae5"; border = "1px solid #10b981"; fw = "bold";
-                  } else if (opt.code === q.studentChoice && !q.isCorrect) {
-                    bg = "#fee2e2"; border = "1px solid #ef4444";
-                  }
-
-                  return (
-                    <div key={opt.code} style={{padding: '12px', background: bg, borderRadius: '6px', border: border, fontWeight: fw, display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                      <span>{opt.code}. {opt.text}</span>
-                      {opt.code === q.studentChoice && (
-                        <span style={{fontSize: '12px', background: '#3b82f6', color: 'white', padding: '2px 8px', borderRadius: '12px', fontWeight: 'normal'}}>Lựa chọn của bạn</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // --- 4. COMPONENT PHÒNG THI (CHÍNH) ---
 export function ExamTake({ token, examId, me, onClose }) {
