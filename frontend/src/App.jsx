@@ -173,7 +173,7 @@ function Main({ token, onLogout }) {
   return (
     <div className="modern-layout">
       <div className="modern-sidebar">
-        <div className="sidebar-brand">🎓 THI TRẮC NGHIỆM</div>
+        <div className="sidebar-brand">🎓TRẮC NGHIỆM</div>
         <div className="sidebar-user">
           <div style={{ fontWeight: 'bold' }}>{me.full_name || me.username}</div>
           <div style={{ fontSize: '11px', color: '#64748b' }}>{roles.join(", ").toUpperCase()}</div>
