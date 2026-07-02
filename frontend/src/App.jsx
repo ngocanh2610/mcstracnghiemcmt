@@ -99,7 +99,6 @@ function Register({ onSwitch }) {
       alert("Đăng ký thành công!"); onSwitch();
     } catch (err) { setError("Lỗi!"); }
   }
-
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
