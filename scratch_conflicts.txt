@@ -1,0 +1,1122 @@
+
+====================== .vscode/settings.json ======================
+<<<<<<< HEAD
+=======
+        },
+        {
+            "pgOptions": {
+                "ssl": {
+                    "rejectUnauthorized": true
+                }
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "driver": "PostgreSQL",
+            "connectString": "postgresql://neondb_owner:npg_pBf2geFZOaH9@ep-orange-unit-ao811px6.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require",
+            "name": "Neon Cloud"
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== api-gateway/Dockerfile ======================
+<<<<<<< HEAD
+CMD ["node","dist/index.js"]
+# Configured API Gateway by Ngoc Anh
+=======
+CMD ["node","dist/index.js"]
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== api-gateway/src/index.ts ======================
+<<<<<<< HEAD
+app.use("/auth", (req: any, res: any) => {
+    req.url = req.url.replace(/^\/auth/, "");
+    proxyTo(AUTH_URL)(req, res);
+});
+=======
+app.use("/auth", proxyTo(AUTH_URL));
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== docker-compose.yml ======================
+<<<<<<< HEAD
+      - user-service
+=======
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+  # --- 3. USER SERVICE & DB ---
+  user-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+      - ./sql/user:/docker-entrypoint-initdb.d
+    networks:
+      - exam-network
+
+  user-service:
+    build: ./services/user-service
+    environment:
+      - PORT=3002
+      - DATABASE_URL=postgresql://postgres:postgres@user-db:5432/user_db
+    depends_on:
+      - user-db
+    networks:
+      - exam-network
+
+=======
+  # --- 3. EXAM SERVICE & DB ---
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+=======
+    environment:
+      - VITE_API_BASE=http://localhost:4000
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+=======
+# --- PHẦN QUAN TRỌNG NHẤT ĐANG BỊ THIẾU ---
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+  user-db-data:
+  exam-db-data:
+  submission-db-data:
+  result-db-data:
+=======
+  exam-db-data:
+  submission-db-data:
+  result-db-data:
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== frontend/package.json ======================
+<<<<<<< HEAD
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 5173"
+=======
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== frontend/src/App.css ======================
+========================================================= */
+========================================================= */
+========================================================= */
+========================================================= */
+========================================================= */
+========================================================= */
+========================================================= */
+<<<<<<< HEAD
+}
+
+/* CSS Giao dien Sinh Vien duoc style boi Nam Anh */
+=======
+}
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== frontend/src/App.jsx ======================
+<<<<<<< HEAD
+import { API } from "./config";
+=======
+
+const API = "http://localhost:4000";
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+      console.error("Login error:", err);
+      const serverMessage = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Lỗi không xác định";
+      alert(`Đăng nhập thất bại: ${serverMessage}`);
+=======
+      alert("Xin lỗi bạn, bạn đã đăng nhập thất bại! Bạn vui lòng kiểm tra lại tài khoản hoặc mật khẩu.");
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        <h2>testCICD</h2>
+        <input className="login-input" placeholder="Tên đăng nhập hoặc email" value={u} onChange={e => setU(e.target.value)} required />
+        <input className="login-input" type="password" placeholder="Mật khẩu" value={p} onChange={e => setP(e.target.value)} required />
+
+=======
+        <h2>Welcome Back</h2>
+        <input className="login-input" placeholder="Tên đăng nhập" value={u} onChange={e => setU(e.target.value)} required />
+        <input className="login-input" type="password" placeholder="Mật khẩu" value={p} onChange={e => setP(e.target.value)} required />
+        
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+      await axios.post(`${API}/auth/register`, {
+        username: form.u, password: form.p, email: form.email, full_name: form.fn
+=======
+      await axios.post(`${API}/auth/register`, { 
+        username: form.u, password: form.p, email: form.email, full_name: form.fn 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        <input className="login-input" placeholder="Tên đăng nhập" onChange={e => setForm({ ...form, u: e.target.value })} required />
+        <input className="login-input" placeholder="Họ và tên thực (VD: Bùi Nam Khánh)" onChange={e => setForm({ ...form, fn: e.target.value })} required />
+        <input className="login-input" type="email" placeholder="Email" onChange={e => setForm({ ...form, email: e.target.value })} required />
+        <input className="login-input" type="password" placeholder="Mật khẩu" onChange={e => setForm({ ...form, p: e.target.value })} required />
+        <input className="login-input" type="password" placeholder="Xác nhận mật khẩu" onChange={e => setForm({ ...form, cp: e.target.value })} required />
+=======
+        <input className="login-input" placeholder="Tên đăng nhập" onChange={e => setForm({...form, u: e.target.value})} required />
+        <input className="login-input" placeholder="Họ và tên thực (VD: Bùi Nam Khánh)" onChange={e => setForm({...form, fn: e.target.value})} required />
+        <input className="login-input" type="email" placeholder="Email" onChange={e => setForm({...form, email: e.target.value})} required />
+        <input className="login-input" type="password" placeholder="Mật khẩu" onChange={e => setForm({...form, p: e.target.value})} required />
+        <input className="login-input" type="password" placeholder="Xác nhận mật khẩu" onChange={e => setForm({...form, cp: e.target.value})} required />
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        <div className="sidebar-brand">🎓 THI TRẮC NGHIỆM</div>
+=======
+        <div className="sidebar-brand">🎓 THI TRẮC NGHIỆM UTT </div>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+            <h1>Xin chào, {me.full_name || me.username}! 👋</h1>
+=======
+                 <div className="welcome-banner" style={{ background: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '30px', borderRadius: '15px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+         <h1 style={{ margin: 0, fontSize: '32px' }}>🏆 Chào mừng {me.full_name} đến với Hệ thống thi!</h1>
+         <p style={{ fontSize: '18px', marginTop: '10px' }}>Hãy tự tin thể hiện bản lĩnh của mình nhé! (Đây là Giao diện màu xanh biển bởi Khánh)</p>
+     </div>  
+
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        <ExamTake
+          token={token}
+          examId={selected}
+          me={me}
+          onClose={(gotoHistory) => {
+            setSelected(null);
+            if (gotoHistory === true) setView("history");
+          }}
+=======
+        <ExamTake 
+          token={token} 
+          examId={selected} 
+          me={me} 
+          onClose={(gotoHistory) => { 
+            setSelected(null); 
+            if (gotoHistory === true) setView("history"); 
+          }} 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== frontend/src/components/Auth.jsx ======================
+<<<<<<< HEAD
+export function Login({ onLogin, onSwitchRegister }) {
+=======
+export function Login({ onLogin, onSwitchRegister }) { 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+    } catch (err) {
+      alert("Đăng nhập thất bại! Kiểm tra lại tài khoản hoặc mật khẩu.");
+    } finally {
+      setLoading(false);
+=======
+    } catch (err) { 
+      alert("Đăng nhập thất bại! Kiểm tra lại tài khoản hoặc mật khẩu."); 
+    } finally { 
+      setLoading(false); 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        <div style={{ marginBottom: '30px' }}>
+          <h2 style={{ margin: '0 0 10px 0', color: '#1e293b', fontSize: '28px' }}>CICD</h2>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '15px' }}>Đăng nhập để tiếp tục hệ thống.</p>
+=======
+        <div style={{marginBottom: '30px'}}>
+           <h2 style={{margin: '0 0 10px 0', color: '#1e293b', fontSize: '28px'}}>Welcome Back</h2>
+           <p style={{margin: 0, color: '#64748b', fontSize: '15px'}}>Đăng nhập để tiếp tục hệ thống.</p>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+
+        <div className="login-options">
+          <label className="remember-me">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+=======
+        
+        <div className="login-options">
+          <label className="remember-me">
+            <input 
+              type="checkbox" 
+              checked={rememberMe} 
+              onChange={(e) => setRememberMe(e.target.checked)} 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+
+=======
+        
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+            <h3 style={{ margin: '0 0 10px 0', color: '#1e293b', fontSize: '20px' }}>Khôi phục mật khẩu</h3>
+            <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '20px', lineHeight: '1.5' }}>
+              Vui lòng nhập địa chỉ email liên kết với tài khoản của bạn. Chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.
+            </p>
+            <input className="login-input" type="email" placeholder="Nhập email của bạn..." style={{ marginBottom: '20px' }} />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                className="btn-primary"
+                style={{ flex: 1 }}
+=======
+            <h3 style={{margin: '0 0 10px 0', color: '#1e293b', fontSize: '20px'}}>Khôi phục mật khẩu</h3>
+            <p style={{color: '#64748b', fontSize: '14px', marginBottom: '20px', lineHeight: '1.5'}}>
+              Vui lòng nhập địa chỉ email liên kết với tài khoản của bạn. Chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.
+            </p>
+            <input className="login-input" type="email" placeholder="Nhập email của bạn..." style={{marginBottom: '20px'}} />
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                className="btn-primary" 
+                style={{flex: 1}} 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+              <button className="btn-outline" style={{ flex: 1 }} onClick={() => setShowForgotModal(false)}>
+=======
+              <button className="btn-outline" style={{flex: 1}} onClick={() => setShowForgotModal(false)}>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+
+=======
+  
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+
+=======
+  
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        {error && <div style={{ color: 'red', marginBottom: 10, fontSize: 14 }}>{error}</div>}
+        <button type="submit" className="btn-primary login-btn">Đăng ký ngay</button>
+        <p style={{ marginTop: '15px', textAlign: 'center' }}>Đã có tài khoản? <span style={{ color: '#4f46e5', cursor: 'pointer', fontWeight: 'bold' }} onClick={onSwitch}>Đăng nhập</span></p>
+=======
+        {error && <div style={{color: 'red', marginBottom: 10, fontSize: 14}}>{error}</div>}
+        <button type="submit" className="btn-primary login-btn">Đăng ký ngay</button>
+        <p style={{marginTop: '15px', textAlign: 'center'}}>Đã có tài khoản? <span style={{color: '#4f46e5', cursor: 'pointer', fontWeight: 'bold'}} onClick={onSwitch}>Đăng nhập</span></p>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== frontend/src/config.js ======================
+<<<<<<< HEAD
+const DEFAULT_API = "http://localhost:4000";
+
+export function getApiBase() {
+  if (typeof window === "undefined") return DEFAULT_API;
+
+  const envBase = import.meta?.env?.VITE_API_BASE;
+  const protocol = window.location.protocol || "http:";
+  const hostname = window.location.hostname || "localhost";
+
+  if (envBase) {
+    return envBase;
+  }
+
+  if (hostname && hostname !== "localhost" && hostname !== "127.0.0.1" && hostname !== "0.0.0.0") {
+    return `${protocol}//${hostname}:4000`;
+  }
+
+  return `${protocol}//${window.location.hostname || "localhost"}:4000`;
+}
+
+export const API = getApiBase();
+=======
+export const API = "http://localhost:4000";
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== frontend/src/pages/Admin.jsx ======================
+<<<<<<< HEAD
+  const loadUsers = () =>
+=======
+  const loadUsers = () => 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+    <div className="card admin-card animate-fade-in" style={{ marginTop: '20px', background: '#fff1f1', padding: '24px', borderRadius: '12px', border: '2px solid #fecaca', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+        <div className="admin-header" style={{ padding: '20px', background: '#f8f9fa', borderRadius: '10px', marginBottom: '20px', borderLeft: '6px solid #4f46e5' }}>
+          <h2>⚙️ QUẢN TRỊ HỆ THỐNG - ADMIN PANEL</h2>
+          <p style={{ color: 'gray' }}>Hệ thống quản lý cốt lõi được thiết kế và bảo trì bởi Ngọc Anh.</p>
+          <button style={{ background: '#4f46e5', color: 'white', padding: '10px 20px', border: 'none', borderRadius: '5px' }}>Tải báo cáo hệ thống</button>
+        </div>
+        <button className="btn-outline" onClick={loadUsers} style={{ borderColor: '#fca5a5', color: '#dc2626' }}>🔄 Làm mới danh sách</button>
+      </div>
+
+      <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid #fee2e2' }}>
+        <table className="history-table" style={{ width: '100%', backgroundColor: 'white', borderCollapse: 'collapse', margin: 0 }}>
+          <thead style={{ background: '#fecaca' }}>
+            <tr>
+              <th style={{ padding: '15px', textAlign: 'left', color: '#991b1b' }}>Họ và Tên</th>
+              <th style={{ padding: '15px', textAlign: 'left', color: '#991b1b' }}>Tài khoản</th>
+              <th style={{ padding: '15px', textAlign: 'left', color: '#991b1b' }}>Email</th>
+              <th style={{ padding: '15px', textAlign: 'left', color: '#991b1b' }}>Quyền</th>
+              <th style={{ padding: '15px', textAlign: 'center', color: '#991b1b' }}>Thao tác</th>
+=======
+    <div className="card admin-card animate-fade-in" style={{marginTop:'20px', background: '#fff1f1', padding: '24px', borderRadius: '12px', border: '2px solid #fecaca', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'}}>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px'}}>
+        <h3 style={{margin: 0, color: '#dc2626', fontSize: '24px'}}>🛠 Quản Trị Người Dùng Hệ Thống</h3>
+        <button className="btn-outline" onClick={loadUsers} style={{borderColor: '#fca5a5', color: '#dc2626'}}>🔄 Làm mới danh sách</button>
+      </div>
+
+      <div style={{overflowX: 'auto', borderRadius: '8px', border: '1px solid #fee2e2'}}>
+        <table className="history-table" style={{width: '100%', backgroundColor: 'white', borderCollapse: 'collapse', margin: 0}}>
+          <thead style={{background: '#fecaca'}}>
+            <tr>
+              <th style={{padding: '15px', textAlign: 'left', color: '#991b1b'}}>Họ và Tên</th>
+              <th style={{padding: '15px', textAlign: 'left', color: '#991b1b'}}>Tài khoản</th>
+              <th style={{padding: '15px', textAlign: 'left', color: '#991b1b'}}>Email</th>
+              <th style={{padding: '15px', textAlign: 'left', color: '#991b1b'}}>Quyền</th>
+              <th style={{padding: '15px', textAlign: 'center', color: '#991b1b'}}>Thao tác</th>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+              <tr key={u.id} style={{ borderTop: '1px solid #fee2e2' }}>
+                {/* ✅ ĐÃ THÊM: Cột Họ và Tên thực của người dùng */}
+                <td style={{ padding: '15px' }}>
+                  <span style={{ fontWeight: '600', color: '#1e293b' }}>{u.full_name || "Chưa cập nhật"}</span>
+                </td>
+
+                <td style={{ padding: '15px' }}>
+                  <code style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', color: '#475569' }}>{u.username}</code>
+                </td>
+
+                <td style={{ padding: '15px', fontSize: '14px', color: '#64748b' }}>{u.email || "—"}</td>
+
+                <td style={{ padding: '15px' }}>
+=======
+              <tr key={u.id} style={{borderTop: '1px solid #fee2e2'}}>
+                {/* ✅ ĐÃ THÊM: Cột Họ và Tên thực của người dùng */}
+                <td style={{padding: '15px'}}>
+                  <span style={{fontWeight: '600', color: '#1e293b'}}>{u.full_name || "Chưa cập nhật"}</span>
+                </td>
+                
+                <td style={{padding: '15px'}}>
+                  <code style={{background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', color: '#475569'}}>{u.username}</code>
+                </td>
+
+                <td style={{padding: '15px', fontSize: '14px', color: '#64748b'}}>{u.email || "—"}</td>
+                
+                <td style={{padding: '15px'}}>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+                <td style={{ padding: '15px' }}>
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
+                    <select
+                      className="login-input"
+                      style={{ margin: 0, padding: '6px', width: 'auto', fontSize: '13px', cursor: 'pointer', height: '35px' }}
+                      value={u.role || 'student'}
+                      onChange={(e) => changeRole(u.id, e.target.value)}
+                      disabled={u.role === 'admin'}
+=======
+                <td style={{padding: '15px'}}>
+                  <div style={{display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center'}}>
+                    <select 
+                      className="login-input" 
+                      style={{margin: 0, padding: '6px', width: 'auto', fontSize: '13px', cursor: 'pointer', height: '35px'}}
+                      value={u.role || 'student'}
+                      onChange={(e) => changeRole(u.id, e.target.value)}
+                      disabled={u.role === 'admin'} 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+
+                    {u.role !== 'admin' && (
+                      <button
+                        className="btn-logout"
+                        style={{ padding: '0 12px', fontSize: '13px', height: '35px', margin: 0, background: '#ef4444' }}
+=======
+                    
+                    {u.role !== 'admin' && (
+                      <button 
+                        className="btn-logout" 
+                        style={{padding: '0 12px', fontSize: '13px', height: '35px', margin: 0, background: '#ef4444'}} 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+
+      {allUsers.length === 0 && (
+        <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', background: 'white', borderRadius: '0 0 8px 8px' }}>
+=======
+      
+      {allUsers.length === 0 && (
+        <div style={{padding: '40px', textAlign: 'center', color: '#94a3b8', background: 'white', borderRadius: '0 0 8px 8px'}}>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== frontend/src/pages/Profile.jsx ======================
+<<<<<<< HEAD
+
+    setLoading(true);
+    try {
+      await axios.put(`${API}/auth/change-password`,
+=======
+    
+    setLoading(true);
+    try {
+      await axios.put(`${API}/auth/change-password`, 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+      <div className="exam-palette-panel" style={{ width: '400px' }}>
+        <h4 style={{ marginBottom: '15px' }}>Đổi mật khẩu</h4>
+        <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <input className="login-input" style={{ margin: 0 }} type="password" placeholder="Mật khẩu cũ"
+            value={oldPassword} onChange={e => setOldPassword(e.target.value)} required />
+          <input className="login-input" style={{ margin: 0 }} type="password" placeholder="Mật khẩu mới"
+            value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+          <input className="login-input" style={{ margin: 0 }} type="password" placeholder="Xác nhận mật khẩu mới"
+            value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+          <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: '5px' }} disabled={loading}>
+=======
+      <div className="exam-palette-panel" style={{width: '400px'}}>
+        <h4 style={{marginBottom: '15px'}}>Đổi mật khẩu</h4>
+        <form onSubmit={handleChangePassword} style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+          <input className="login-input" style={{margin: 0}} type="password" placeholder="Mật khẩu cũ" 
+                 value={oldPassword} onChange={e => setOldPassword(e.target.value)} required />
+          <input className="login-input" style={{margin: 0}} type="password" placeholder="Mật khẩu mới" 
+                 value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+          <input className="login-input" style={{margin: 0}} type="password" placeholder="Xác nhận mật khẩu mới" 
+                 value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+          <button type="submit" className="btn-primary" style={{width: '100%', marginTop: '5px'}} disabled={loading}>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== frontend/src/pages/Student.jsx ======================
+<<<<<<< HEAD
+// Shared UI style presets to keep buttons and controls consistent
+const UI = {
+  button: { padding: '10px 14px', minWidth: '140px', height: '40px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' },
+  outline: { padding: '8px 12px', minWidth: '120px', height: '38px', borderRadius: '8px', background: '#fff', border: '1px solid #e5e7eb', cursor: 'pointer', fontSize: '14px' },
+  paletteBox: { width: '40px', height: '40px', margin: '4px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, cursor: 'pointer', background: '#fff', border: '1px solid #e5e7eb' }
+};
+
+=======
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+  const [favorites, setFavorites] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('favExams') || '[]'); } catch { return []; }
+  });
+=======
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+  const toggleFavorite = (examId) => {
+    setFavorites(prev => {
+      const next = prev.includes(examId) ? prev.filter(id => id !== examId) : [...prev, examId];
+      try { localStorage.setItem('favExams', JSON.stringify(next)); } catch {};
+      return next;
+    });
+  };
+
+=======
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        <div style={{ flex: 1, minWidth: '250px', minHeight: '110px', padding: '20px', background: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+=======
+        <div style={{ flex: 1, minWidth: '250px', padding: '20px', background: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        <div style={{ flex: 1, minWidth: '250px', minHeight: '110px', padding: '20px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+=======
+        <div style={{ flex: 1, minWidth: '250px', padding: '20px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ display: 'inline-block', padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                    {exam.subject || "Thi trắc nghiệm"}
+                  </span>
+                  <button onClick={() => toggleFavorite(exam.id)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '18px', color: favorites.includes(exam.id) ? '#f59e0b' : '#9ca3af' }} aria-label="favorite">
+                    {favorites.includes(exam.id) ? '★' : '☆'}
+                  </button>
+                </div>
+=======
+                <span style={{ display: 'inline-block', padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', marginBottom: '10px' }}>
+                  {exam.subject || "Thi trắc nghiệm"}
+                </span>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+                style={{ ...UI.button, background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', width: '100%' }}
+=======
+                style={{ width: '100%', padding: '10px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'background 0.2s' }}
+                onMouseOver={(e) => e.target.style.background = '#2563eb'}
+                onMouseOut={(e) => e.target.style.background = '#3b82f6'}
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+export function StudentHistory({ token, exams, onTakeExam }) {
+=======
+export function StudentHistory({ token, exams }) {
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+  const downloadCSV = () => {
+    if (!history || history.length === 0) { alert('Không có lịch sử để tải xuống'); return; }
+    const rows = [['exam_title','date','score']];
+    history.forEach(h => rows.push([exams.find(e => e.id === h.exam_id)?.title || 'Đề đã xóa', new Date(h.created_at).toLocaleString(), h.score === null ? '' : h.score]));
+    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'history.csv'; a.click(); URL.revokeObjectURL(url);
+  };
+
+=======
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+      
+      {/* --- DÁN ĐOẠN CODE CỦA BẠN VÀO ĐÂY --- */}
+      <div className="student-welcome" style={{ borderLeft: '5px solid #10b981', padding: '15px', background: '#ecfdf5', margin: '20px 0', borderRadius: '8px' }}>
+          <h2 style={{ color: '#047857' }}>🎓 Xin chào Tân Sinh Viên!</h2>
+          <p>Chào mừng bạn đến với hệ thống thi trắc nghiệm. Chúc bạn đạt điểm cao!</p>
+          <i style={{ color: '#6ee7b7' }}>(Giao diện phát triển bởi Nam Anh)</i>
+      </div>
+      {/* ------------------------------------- */}
+
+      <h3>Lịch sử thi</h3>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+        <button style={{ ...UI.outline }} onClick={downloadCSV}>⬇️ Tải lịch sử (CSV)</button>
+        {onTakeExam && <button style={{ ...UI.outline }} onClick={() => {
+          const last = history.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
+          if (last) onTakeExam(last.exam_id); else alert('Không có lịch sử để làm lại');
+        }}>🔁 Làm lại lần gần nhất</button>}
+      </div>
+=======
+      <h3>Lịch sử thi</h3>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+                    <button className="btn-outline" style={{ ...UI.outline, padding: '4px 10px', fontSize: '13px' }} onClick={() => setReviewId(h.id)}>
+=======
+                    <button className="btn-outline" style={{padding: '4px 10px', fontSize: '13px'}} onClick={() => setReviewId(h.id)}>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+    if (window.confirm("Bạn có chắc muốn thoát?")) {
+=======
+    if (window.confirm("Bạn có chắc muốn thoát? Mọi tiến trình chưa nộp bài sẽ dựa trên bản nháp cuối cùng!")) {
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+  const clearDraft = async () => {
+    if (!window.confirm('Xác nhận xóa bản nháp cho đề thi này?')) return;
+    try {
+      await axios.delete(`${API}/submissions/draft/${examId}/${me.id}`, { headers: { Authorization: "Bearer " + token } });
+      setAnswers({});
+      setTimeLeft(data ? data.exam.duration * 60 : null);
+      alert('Đã xóa bản nháp. Mở lại đề thi để làm mới.');
+    } catch (err) { console.error(err); alert('Xóa nháp thất bại'); }
+  };
+
+  const goToNextUnanswered = () => {
+    const idx = data.questions.findIndex(q => !answers[q.id]);
+    if (idx === -1) { alert('Không còn câu chưa làm'); return; }
+    scrollToQuestion(idx);
+  };
+
+=======
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+              <button className="btn-outline" onClick={handleExit} style={{ ...UI.outline, padding: '6px 12px', fontSize: '14px', border: 'none', background: '#fee2e2', color: '#ef4444' }}>
+=======
+              <button className="btn-outline" onClick={handleExit} style={{ padding: '6px 12px', fontSize: '14px', border: 'none', background: '#fee2e2', color: '#ef4444' }}>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+            <div className={`timer ${timeLeft !== null && timeLeft < 60 ? 'warning' : ''}`}>
+                {timeLeft !== null ? `⏳ ${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2, '0')}` : '⏳ --:--'}
+=======
+            <div className={`timer ${timeLeft < 60 ? 'warning' : ''}`}>
+                ⏳ {Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2, '0')}
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+                      <label key={opt.id} className="option-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', borderRadius: '6px', background: '#fafafa', border: '1px solid #f1f5f9' }}>
+                          <input type="radio" name={q.id} onChange={() => setAnswers({...answers, [q.id]: opt.code})} checked={answers[q.id] === opt.code} />
+                          <span>{opt.text}</span>
+                        </label>
+=======
+                      <label key={opt.id} className="option-item">
+                        <input type="radio" name={q.id} onChange={() => setAnswers({...answers, [q.id]: opt.code})} checked={answers[q.id] === opt.code} />
+                        <span>{opt.text}</span>
+                      </label>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', alignItems: 'center' }}>
+              <button className="btn-outline" style={{ ...UI.outline }} disabled={currentPage === 0} onClick={() => { setCurrentPage(p => p - 1); window.scrollTo(0,0); }}>⬅ Trang trước</button>
+              <span>Trang {currentPage + 1} / {totalPages}</span>
+              <button className="btn-outline" style={{ ...UI.outline }} disabled={currentPage === totalPages - 1} onClick={() => { setCurrentPage(p => p + 1); window.scrollTo(0,0); }}>Trang sau ➡</button>
+=======
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+              <button className="btn-outline" disabled={currentPage === 0} onClick={() => { setCurrentPage(p => p - 1); window.scrollTo(0,0); }}>⬅ Trang trước</button>
+              <span>Trang {currentPage + 1} / {totalPages}</span>
+              <button className="btn-outline" disabled={currentPage === totalPages - 1} onClick={() => { setCurrentPage(p => p + 1); window.scrollTo(0,0); }}>Trang sau ➡</button>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+                <button key={q.id} className={`palette-box ${answers[q.id] ? 'answered' : ''}`} onClick={() => scrollToQuestion(i)} style={{ ...UI.paletteBox, border: flagged[q.id] ? '2px solid #ef4444' : UI.paletteBox.border, background: answers[q.id] ? '#d1fae5' : UI.paletteBox.background }}>
+=======
+                <button key={q.id} className={`palette-box ${answers[q.id] ? 'answered' : ''}`} onClick={() => scrollToQuestion(i)} style={{ border: flagged[q.id] ? '2px solid #ef4444' : '' }}>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="btn-primary" onClick={() => submit(false)} disabled={isSubmitting} style={{ ...UI.button, flex: 1, background: '#10b981', color: '#fff', border: 'none' }}>
+                  {isSubmitting ? "Đang xử lý..." : "Nộp bài ngay"}
+                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '140px' }}>
+                  <button style={{ ...UI.outline }} onClick={goToNextUnanswered}>➡ Câu chưa làm</button>
+                  <button style={{ ...UI.outline, background: '#fff7ed', color: '#b45309' }} onClick={clearDraft}>🗑️ Xóa nháp</button>
+                </div>
+              </div>
+=======
+              <button className="btn-primary" onClick={() => submit(false)} disabled={isSubmitting} style={{width:'100%'}}>
+                {isSubmitting ? "Đang xử lý..." : "Nộp bài ngay"}
+              </button>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== frontend/src/pages/Teacher.jsx ======================
+<<<<<<< HEAD
+    XLSX.writeFile(workbook, `KetQua_De_${examId.slice(0, 5)}.xlsx`);
+=======
+    XLSX.writeFile(workbook, `KetQua_De_${examId.slice(0,5)}.xlsx`);
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        <h2 style={{ margin: 0, fontSize: '20px' }}>📊 Thống kê kết quả đề thi (Đã test CI/CD)</h2>
+=======
+        <h2 style={{ margin: 0, fontSize: '20px' }}>📊 Thống kê kết quả đề thi</h2>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        view === 'edit' ? <ExamQuestionEditor token={token} examId={id} onClose={() => setView('list')} /> :
+          <table className="history-table" style={{ width: '100%' }}>
+            <thead><tr><th>TÊN ĐỀ</th><th>MÔN</th><th style={{ textAlign: 'center' }}>HÀNH ĐỘNG</th></tr></thead>
+            <tbody>
+              {exams.map(ex => (
+                <tr key={ex.id}>
+                  <td><strong>{ex.title}</strong></td><td>{ex.subject}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+                      <button className="btn-primary" style={{ background: '#10b981', padding: '5px 10px' }} onClick={() => { setId(ex.id); setView('stats'); }}>📊 Thống kê</button>
+
+                      {/* ✅ CHỈ GIÁO VIÊN MỚI THẤY NÚT SỬA */}
+                      {!isAdmin && (
+                        <button className="btn-primary" style={{ background: '#3b82f6', padding: '5px 10px' }} onClick={() => { setId(ex.id); setView('edit'); }}>✏️ Sửa câu</button>
+                      )}
+
+                      <button className="btn-primary" style={{ background: '#ef4444', padding: '5px 10px' }} onClick={async () => { if (window.confirm("Xóa đề?")) { await axios.delete(`${API}/exams/${ex.id}`, { headers: { Authorization: "Bearer " + token } }); load(); } }}>🗑️ Xóa</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+=======
+       view === 'edit' ? <ExamQuestionEditor token={token} examId={id} onClose={() => setView('list')} /> :
+       <table className="history-table" style={{ width: '100%' }}>
+         <thead><tr><th>TÊN ĐỀ</th><th>MÔN</th><th style={{ textAlign: 'center' }}>HÀNH ĐỘNG</th></tr></thead>
+         <tbody>
+           {exams.map(ex => (
+             <tr key={ex.id}>
+               <td><strong>{ex.title}</strong></td><td>{ex.subject}</td>
+               <td style={{ textAlign: 'center' }}>
+                 <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+                    <button className="btn-primary" style={{ background: '#10b981', padding: '5px 10px' }} onClick={() => { setId(ex.id); setView('stats'); }}>📊 Thống kê</button>
+                    
+                    {/* ✅ CHỈ GIÁO VIÊN MỚI THẤY NÚT SỬA */}
+                    {!isAdmin && (
+                      <button className="btn-primary" style={{ background: '#3b82f6', padding: '5px 10px' }} onClick={() => { setId(ex.id); setView('edit'); }}>✏️ Sửa câu</button>
+                    )}
+
+                    <button className="btn-primary" style={{ background: '#ef4444', padding: '5px 10px' }} onClick={async () => { if(window.confirm("Xóa đề?")) { await axios.delete(`${API}/exams/${ex.id}`, { headers: { Authorization: "Bearer " + token } }); load(); } }}>🗑️ Xóa</button>
+                 </div>
+               </td>
+             </tr>
+           ))}
+         </tbody>
+       </table>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+      <h3>🚀 Soạn đề thi mới (Test Auto Deploy CI/CD)</h3>
+=======
+      <h3>🚀 Soạn đề thi mới</h3>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+          <input type="number" className="login-input" style={{ width: '80px', margin: 0, textAlign: 'center' }} value={form.duration} onChange={e => setForm({ ...form, duration: e.target.value })} />
+          <span style={{ fontSize: '13px', color: '#666', whiteSpace: 'nowrap' }}>phút</span>
+=======
+           <input type="number" className="login-input" style={{ width: '80px', margin: 0, textAlign: 'center' }} value={form.duration} onChange={e => setForm({...form, duration: e.target.value})} />
+           <span style={{ fontSize: '13px', color: '#666', whiteSpace: 'nowrap' }}>phút</span>
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+
+      {form.subject && (
+        <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '10px' }}>
+          <div style={{ marginBottom: '10px' }}>
+            🎲 Lấy ngẫu nhiên <input type="number" style={{ width: '50px' }} value={rand} onChange={e => setRand(e.target.value)} /> câu
+=======
+      
+      {form.subject && (
+        <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '10px' }}>
+          <div style={{ marginBottom: '10px' }}>
+            🎲 Lấy ngẫu nhiên <input type="number" style={{ width: '50px' }} value={rand} onChange={e => setRand(e.target.value)} /> câu 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+  const parseWord = async (file) => {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    
+    // Tách các đáp án bị dính trên cùng 1 dòng (ví dụ " A. " hoặc " B) ") xuống dòng mới
+    let rawContent = result.value.replace(/\s+([A-D][\.\)]\s+)/g, '\n$1');
+
+    const lines = rawContent.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+=======
+  // ✅ HÀM PARSE FIX LỖI SỐ 3: Cắt phần đáp án bị dính vào câu hỏi
+  const parseWord = async (file) => {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    const lines = result.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        current = { text, options: [] };
+      }
+=======
+        
+        // 🔥 Cắt bỏ phần đáp án bị dính vào câu hỏi (Ví dụ: " A. ")
+        const optionPos = text.search(/\s+[A-D][\.\)]/);
+        if (optionPos !== -1) { text = text.substring(0, optionPos).trim(); }
+
+        current = { text, options: [] };
+      } 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+
+=======
+        
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+
+=======
+        
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+              {q.options?.map(o => <span key={o.id} style={{ color: o.is_correct ? '#10b981' : '#64748b', fontWeight: o.is_correct ? 'bold' : 'normal' }}>{o.code}. {o.text} {o.is_correct && '✅'}</span>)}
+=======
+                {q.options?.map(o => <span key={o.id} style={{ color: o.is_correct ? '#10b981' : '#64748b', fontWeight: o.is_correct ? 'bold' : 'normal' }}>{o.code}. {o.text} {o.is_correct && '✅'}</span>)}
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== services/auth-service/src/index.ts ======================
+<<<<<<< HEAD
+// @ts-nocheck
+=======
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        // 2. Tìm người dùng trong Database: Lấy thông tin tài khoản dựa trên username hoặc email.
+        const r = await pool.query("SELECT * FROM users WHERE username=$1 OR email=$1", [username]);
+        const user = r.rows[0];
+
+        // 3. Xác thực (Authentication):
+        // - '!user': Kiểm tra xem username/email này có tồn tại trong hệ thống hay không.
+=======
+        // 2. Tìm người dùng trong Database: Lấy thông tin tài khoản dựa trên username.
+        const r = await pool.query("SELECT * FROM users WHERE username=$1", [username]);
+        const user = r.rows[0];
+
+        // 3. Xác thực (Authentication):
+        // - '!user': Kiểm tra xem username này có tồn tại trong hệ thống hay không.
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        // Ép kiểu 'as MyJwtPayload' để TypeScript hiểu rằng sau khi giải mã, ta sẽ có được 'payload.id' của người dùng.
+=======
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        // Việc này cực kỳ quan trọng để đảm bảo chính chủ đang thao tác chứ không phải ai đó mượn máy tính khi chưa đăng xuất.
+=======
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+// --- 6. QUẢN LÝ TÀI KHOẢN (Admin) ---
+app.put("/users/:id/role", async (req: Request, res: Response) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ error: "No token" });
+    try {
+        const payload = jwt.verify(token, JWT_SECRET) as MyJwtPayload;
+        if (!payload.roles.includes("admin")) return res.status(403).json({ error: "Forbidden" });
+
+        const { id } = req.params;
+        const { role } = req.body;
+        
+        const roleRes = await pool.query("SELECT id FROM roles WHERE name=$1", [role]);
+        if (!roleRes.rows[0]) return res.status(400).json({ error: "Role không hợp lệ" });
+        const roleId = roleRes.rows[0].id;
+
+        await pool.query("DELETE FROM user_roles WHERE user_id=$1", [id]);
+        await pool.query("INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)", [id, roleId]);
+
+        res.json({ success: true });
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete("/users/:id", async (req: Request, res: Response) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ error: "No token" });
+    try {
+        const payload = jwt.verify(token, JWT_SECRET) as MyJwtPayload;
+        if (!payload.roles.includes("admin")) return res.status(403).json({ error: "Forbidden" });
+
+        const { id } = req.params;
+        await pool.query("DELETE FROM users WHERE id=$1", [id]);
+        res.json({ success: true });
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+=======
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== services/auth-service/tsconfig.json ======================
+<<<<<<< HEAD
+    "allowJs": true
+=======
+    "allowJs": true,
+    "types": ["node"]
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== services/exam-service/src/index.ts ======================
+<<<<<<< HEAD
+// 3.1 Lấy chi tiết đề (Thí sinh làm bài)
+router.get("/:id", async (req, res) => {
+    const { id } = req.params;
+    if (id === 'internal') return; // Tránh nhầm lẫn với route internal
+    try {
+        const examRes = await pool.query("SELECT * FROM exams WHERE id = $1", [id]);
+        if (examRes.rows.length === 0) return res.status(404).json({ error: "Không tìm thấy đề" });
+        const questionsRes = await pool.query(`
+            SELECT q.id, q.text, q.points, 
+                   COALESCE(json_agg(json_build_object('id', o.id, 'code', o.code, 'text', o.text) ORDER BY o.code) 
+                   FILTER (WHERE o.id IS NOT NULL), '[]') as options
+=======
+// --- 3.1 Lấy chi tiết đề (Thí sinh làm bài) ---
+router.get("/:id", async (req, res) => {
+    // 1. Lấy ID đề thi: Trích xuất tham số 'id' từ trên URL (Ví dụ: /exams/123 -> id = 123)
+    const { id } = req.params;
+
+    // 2. Chặn xung đột Route: 
+    // Nếu URL là /exams/internal, ta phải bỏ qua (return) để Express nhường quyền xử lý 
+    // cho một route khác có tên là /internal/... (thường dùng để lấy cả đáp án cho Giám khảo hoặc Server tự chấm).
+    if (id === 'internal') return; 
+
+    try {
+        // 3. Lấy thông tin chung của đề thi: (Tên đề, môn học, thời gian làm bài,...)
+        const examRes = await pool.query("SELECT * FROM exams WHERE id = $1", [id]);
+        
+        // Nếu không tìm thấy đề thi nào khớp với ID này, trả về lỗi 404 Not Found.
+        if (examRes.rows.length === 0) return res.status(404).json({ error: "Không tìm thấy đề" });
+
+        // 4. Lấy Danh sách Câu hỏi và Đáp án (BẢO MẬT CAO):
+        const questionsRes = await pool.query(`
+            SELECT q.id, q.text, q.points, 
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        res.json({ exam: examRes.rows[0], questions: questionsRes.rows });
+    } catch (err: any) { res.status(500).json({ error: err.message }); }
+=======
+
+        // 5. Gộp dữ liệu và Trả về:
+        // Đóng gói thông tin chung của đề (exam) và mảng các câu hỏi kèm đáp án (questions) 
+        // thành một JSON duy nhất bắn về cho Frontend hiển thị giao diện làm bài.
+        res.json({ 
+            exam: examRes.rows[0], 
+            questions: questionsRes.rows 
+        });
+
+    } catch (err: any) {
+        // 6. Xử lý ngoại lệ: Nếu DB bị lỗi hoặc query sai, bắt lỗi và trả về HTTP 500 (Internal Server Error)
+        res.status(500).json({ error: err.message }); 
+    }
+>>>>>>> origin/khanh
+-----------------------------------------------------
+
+====================== services/submission-service/src/index.ts ======================
+<<<<<<< HEAD
+    const { exam_id, user_id, answers, duration_seconds } = req.body;
+    if (!exam_id || !user_id || !answers) return res.status(400).json({ error: "Dữ liệu thiếu" });
+
+    try {
+        const examRes = await http.get(`${EXAM_SERVICE_URL}/internal/${exam_id}/answers`);
+        const questions = examRes.data.questions;
+
+        let correct_count = 0;
+        questions.forEach((q: any) => {
+            const correctOption = q.options.find((opt: any) => opt.is_correct === true);
+            const studentAnswer = answers[q.id];
+            if (correctOption && studentAnswer) {
+                if (studentAnswer.toString().trim().toUpperCase() === correctOption.code.toString().trim().toUpperCase()) {
+                    correct_count++;
+=======
+    // 1. Nhận dữ liệu từ Frontend khi học sinh bấm "Nộp bài"
+    const { exam_id, user_id, answers, duration_seconds } = req.body;
+    
+    // Kiểm tra dữ liệu: Thiếu ID đề, ID học sinh hoặc bộ đáp án thì chặn lại ngay
+    if (!exam_id || !user_id || !answers) return res.status(400).json({ error: "Dữ liệu thiếu" });
+
+    try {
+        // 2. GIAO TIẾP MICROSERVICES: Gọi sang Exam Service để lấy ĐÁP ÁN GỐC
+        const examRes = await http.get(`${EXAM_SERVICE_URL}/internal/${exam_id}/answers`);
+        const questions = examRes.data.questions;
+
+        // 3. THUẬT TOÁN CHẤM ĐIỂM TỰ ĐỘNG
+        let correct_count = 0;
+        questions.forEach((q: any) => {
+            // Tìm ra đáp án đúng của câu hỏi hiện tại từ dữ liệu gốc
+            const correctOption = q.options.find((opt: any) => opt.is_correct === true);
+            // Lấy đáp án mà học sinh đã chọn (ví dụ: "A", "B")
+            const studentAnswer = answers[q.id];
+            
+            if (correctOption && studentAnswer) {
+                // So sánh đáp án: Dùng toString(), trim() và toUpperCase() để đảm bảo 
+                // không bị sai lệch do khoảng trắng hay chữ hoa/chữ thường (ví dụ " a " vẫn tính là đúng bằng "A").
+                if (studentAnswer.toString().trim().toUpperCase() === correctOption.code.toString().trim().toUpperCase()) {
+                    correct_count++; // Nếu khớp thì cộng 1 câu đúng
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        const score = questions.length > 0 ? Math.round((correct_count / questions.length) * 10 * 100) / 100 : 0;
+
+        // KIỂM TRA: ĐÃ CÓ BẢN NHÁP (draft) DO AUTOSAVE TẠO CHƯA?
+        let submissionId;
+=======
+        // 4. Tính điểm thang 10: 
+        const score = questions.length > 0 ? Math.round((correct_count / questions.length) * 10 * 100) / 100 : 0;
+
+        // 5. XỬ LÝ DATABASE: NỐI TIẾP LOGIC CỦA AUTOSAVE (LƯU NHÁP)
+        let submissionId;
+        // Kiểm tra xem hệ thống có đang lưu giữ bản nháp (draft) nào của học sinh này không
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+            // Có bản nháp -> Ghi đè đáp án cuối cùng và ĐỔI TRẠNG THÁI THÀNH 'completed'
+=======
+            // TÌNH HUỐNG A: Có bản nháp
+            // Update ghi đè bộ đáp án cuối cùng, cập nhật thời gian làm bài, 
+            // và quan trọng nhất: ĐỔI TRẠNG THÁI (status) thành 'completed' (Đã hoàn thành).
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+            // Chưa có bản nháp -> Tạo dòng mới cứng với status 'completed'
+=======
+            // TÌNH HUỐNG B: Không có bản nháp (Trường hợp học sinh làm quá nhanh, hoặc lỗi mạng nên autosave chưa kịp chạy)
+            // Tạo hẳn một bản ghi mới toanh, chốt luôn trạng thái là 'completed'.
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        // Gửi điểm sang Result Service (Chạy ngầm)
+=======
+        // 6. GIAO TIẾP MICROSERVICES LẦN 2: BẮN ĐIỂM SANG RESULT SERVICE (EVENT-DRIVEN CƠ BẢN)
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        res.status(201).json({ message: "Nộp bài thành công", submission_id: submissionId, score });
+    } catch (err: any) {
+=======
+        // 7. Hoàn tất: Trả về HTTP 201 cùng số điểm nóng hổi cho Frontend hiển thị.
+        res.status(201).json({ message: "Nộp bài thành công", submission_id: submissionId, score });
+        
+    } catch (err: any) {
+        // 8. Bắt lỗi tổng
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+    const { exam_id, user_id, answers, duration_seconds } = req.body;
+    if (!exam_id || !user_id) return res.status(400).json({ error: "Thiếu exam_id hoặc user_id" });
+
+    try {
+        // Tìm xem học sinh này có ĐANG làm dở bản nháp nào không (status = 'draft')
+=======
+    // 1. Nhận dữ liệu: Lấy ID đề thi, ID học sinh, bộ đáp án đang chọn dở và thời gian đã trôi qua
+    const { exam_id, user_id, answers, duration_seconds } = req.body;
+    
+    // 2. Kiểm tra hợp lệ: Bắt buộc phải có định danh đề thi và người dùng
+    if (!exam_id || !user_id) return res.status(400).json({ error: "Thiếu exam_id hoặc user_id" });
+
+    try {
+        // 3. Kiểm tra bài thi dở dang (Draft Check):
+        // Tìm trong Database xem học sinh này có đang làm dở cái đề này không.
+        // Chỉ tìm những bản ghi có trạng thái là 'draft' (đang nháp). Nếu đã 'submitted' (đã nộp) thì bỏ qua.
+        // Dùng 'ORDER BY created_at DESC LIMIT 1' để đề phòng lỗi có nhiều bản nháp, ta lấy bản nháp mới nhất.
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+            // Đã có nháp -> Chỉ Cập nhật (UPDATE)
+=======
+            // 4A. Đã có nháp -> Cập nhật (UPDATE)
+            // Lấy id của bản nháp tìm được và đè bộ đáp án mới nhất (answers) cùng thời gian làm bài (duration_seconds) lên.
+            // Dùng JSON.stringify() để chuyển đổi Object đáp án thành chuỗi JSON trước khi lưu vào PostgreSQL.
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+            // Chưa có nháp -> Thêm mới (INSERT) với status là 'draft'
+=======
+            // 4B. Chưa có nháp -> Tạo mới (INSERT)
+            // Lần đầu tiên hệ thống tự động lưu, nó sẽ tạo ra một record hoàn toàn mới 
+            // Gắn cứng status là 'draft' để đánh dấu đây là bài đang làm, chưa phải kết quả cuối.
+>>>>>>> origin/khanh
+-----------------------------------------------------
+<<<<<<< HEAD
+        res.status(200).json({ message: "Đã lưu nháp" });
+    } catch (err: any) {
+=======
+
+        // 5. Trả về thành công
+        res.status(200).json({ message: "Đã lưu nháp" });
+        
+    } catch (err: any) {
+        // 6. Xử lý lỗi: Ghi log lỗi ra console Server để dễ debug và trả về lỗi 500 cho Frontend
+>>>>>>> origin/khanh
+-----------------------------------------------------

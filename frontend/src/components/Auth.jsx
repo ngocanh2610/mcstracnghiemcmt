@@ -34,7 +34,7 @@ export function Login({ onLogin, onSwitchRegister }) {
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
         <div style={{ marginBottom: '30px' }}>
-          <h2 style={{ margin: '0 0 10px 0', color: '#1e293b', fontSize: '28px' }}>CICD</h2>
+          <h2 style={{ margin: '0 0 10px 0', color: '#1e293b', fontSize: '28px' }}>Welcome Back</h2>
           <p style={{ margin: 0, color: '#64748b', fontSize: '15px' }}>Đăng nhập để tiếp tục hệ thống.</p>
         </div>
 
