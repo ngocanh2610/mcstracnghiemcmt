@@ -1,3 +1,4 @@
+
 import './App.css';
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -191,12 +192,11 @@ function Main({ token, onLogout }) {
 
       <div className="modern-content">
         {view === "exam_list" && (
-          <div className="animate-fade-in" style={{ textAlign: 'center', padding: '40px' }}>
-            <div className="welcome-banner" style={{ background: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '30px', borderRadius: '15px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
-              <h1 style={{ margin: 0, fontSize: '32px' }}>🏆 Chào mừng {me.full_name || me.username} đến với Hệ thống thi!</h1>
-              <p style={{ fontSize: '18px', marginTop: '10px' }}>Hãy tự tin thể hiện bản lĩnh của mình nhé! (Đây là Giao diện màu xanh biển bởi Khánh)</p>
-            </div>
-          </div>
+          <div className="motivational-banner" style={{ background: 'linear-gradient(to right, #ff416c, #ff4b2b)', color: 'white', padding: '30px', borderRadius: '15px', textAlign: 'center', border: '3px dashed white' }}>
+         <h1 style={{ margin: 0, fontSize: '32px' }}>💯 Xin chào {me.full_name}! Quyết tâm đạt điểm 10!</h1>
+         <p style={{ fontSize: '18px', marginTop: '10px' }}>Hôm nay bạn sẽ làm bài thật xuất sắc! (Giao diện màu Đỏ rực bởi Minh)</p>
+     </div>
+
         )}
         {view === "take_exam" && <StudentDashboard token={token} exams={exams} onTakeExam={setSelected} />}
         {view === "history" && <StudentHistory token={token} exams={exams} />}
