@@ -111,9 +111,137 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
   );
 }
 
+// --- 2. COMPONENT LỊCH SỬ THI ---
+export function StudentHistory({ token, exams, onTakeExam }) {
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [reviewId, setReviewId] = useState(null);
 
+  const downloadCSV = () => {
+    if (!history || history.length === 0) { alert('Không có lịch sử để tải xuống'); return; }
+    const rows = [['exam_title','date','score']];
+    history.forEach(h => rows.push([exams.find(e => e.id === h.exam_id)?.title || 'Đề đã xóa', new Date(h.created_at).toLocaleString(), h.score === null ? '' : h.score]));
+    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'history.csv'; a.click(); URL.revokeObjectURL(url);
+  };
 
+  useEffect(() => {
+    axios.get(`${API}/submissions/my`, { headers: { Authorization: "Bearer " + token } })
+      .then(async r => {
+        const full = await Promise.all(r.data.map(async s => {
+          try {
+            const sc = await axios.get(`${API}/results/submission/${s.id}`, { headers: { Authorization: "Bearer " + token } });
+            return { ...s, score: sc.data.score };
+          } catch { return { ...s, score: null }; }
+        }));
+        setHistory(full); setLoading(false);
+      });
+  }, [token]);
 
+  return (
+    <div className="exam-box">
+      
+      {/* --- DÁN ĐOẠN CODE CỦA BẠN VÀO ĐÂY --- */}
+      <div className="student-welcome" style={{ borderLeft: '5px solid #10b981', padding: '15px', background: '#ecfdf5', margin: '20px 0', borderRadius: '8px' }}>
+          <h2 style={{ color: '#047857' }}>🎓 Xin chào Tân Sinh Viên!</h2>
+          <p>Chào mừng bạn đến với hệ thống thi trắc nghiệm. Chúc bạn đạt điểm cao!</p>
+          <i style={{ color: '#6ee7b7' }}>(Giao diện phát triển bởi Nam Anh)</i>
+      </div>
+      {/* ------------------------------------- */}
+
+      <h3>Lịch sử thi</h3>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+        <button style={{ ...UI.outline }} onClick={downloadCSV}>⬇️ Tải lịch sử (CSV)</button>
+        {onTakeExam && <button style={{ ...UI.outline }} onClick={() => {
+          const last = history.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
+          if (last) onTakeExam(last.exam_id); else alert('Không có lịch sử để làm lại');
+        }}>🔁 Làm lại lần gần nhất</button>}
+      </div>
+      {loading ? <p>Đang tải lịch sử...</p> : (
+        <table className="history-table">
+          <thead><tr><th>Đề thi</th><th>Ngày làm</th><th>Điểm</th><th>Hành động</th></tr></thead>
+          <tbody>
+            {history.map(h => (
+              <tr key={h.id}>
+                <td>{exams.find(e => e.id === h.exam_id)?.title || "Đề thi đã xóa"}</td>
+                <td>{new Date(h.created_at).toLocaleString()}</td>
+                <td style={{fontWeight:'bold', color: h.score === null ? '#d97706' : '#16a34a'}}>{h.score !== null ? `${h.score}đ` : "Đang chấm..."}</td>
+                <td>
+                  {h.score !== null && (
+                    <button className="btn-outline" style={{ ...UI.outline, padding: '4px 10px', fontSize: '13px' }} onClick={() => setReviewId(h.id)}>
+                      👁️ Xem bài làm
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      {reviewId && <ExamReview token={token} submissionId={reviewId} onClose={() => setReviewId(null)} />}
+    </div>
+  );
+}
+
+// --- 3. COMPONENT XEM LẠI BÀI ĐÃ LÀM ---
+export function ExamReview({ token, submissionId, onClose }) {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    axios.get(`${API}/submissions/review/${submissionId}`, { headers: { Authorization: "Bearer " + token } })
+      .then(r => setData(r.data))
+      .catch(() => { alert("Lỗi tải chi tiết bài làm!"); onClose(); });
+  }, [submissionId, token]);
+
+  if (!data) return <div className="exam-take-overlay">Đang tải dữ liệu bài làm...</div>;
+
+  return (
+    <div className="exam-take-overlay">
+      <div className="exam-box" style={{width: '90%', maxWidth: '800px', maxHeight: '90vh', display: 'flex', flexDirection: 'column', padding: '0'}}>
+        <div style={{display:'flex', justifyContent:'space-between', alignItems: 'center', padding: '20px', borderBottom: '1px solid #e5e7eb', background: '#f9fafb', borderRadius: '8px 8px 0 0'}}>
+          <h3 style={{margin: 0, color: '#1f2937'}}>Chi tiết bài làm: {data.title}</h3>
+          <button className="btn-logout" onClick={onClose}>Đóng</button>
+        </div>
+        <div style={{padding: '20px', overflowY: 'auto'}}>
+          {data.review.map((q, i) => (
+            <div key={q.id} className="question-card" style={{borderLeft: `5px solid ${q.isCorrect ? '#10b981' : '#ef4444'}`, marginBottom: '20px', padding: '15px', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.1)'}}>
+              <p style={{fontSize: '16px', marginBottom: '15px'}}>
+                <strong>Câu {i+1}:</strong> {q.text} 
+                <span style={{marginLeft: '10px', fontSize: '14px', fontWeight: 'bold', color: q.isCorrect ? '#10b981' : '#ef4444'}}>
+                  {q.isCorrect ? "✅ Đúng" : "❌ Sai"}
+                </span>
+              </p>
+              <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                {q.options.map(opt => {
+                  let bg = "#f9fafb";
+                  let border = "1px solid #e5e7eb";
+                  let fw = "normal";
+
+                  if (opt.code === q.correctChoice) {
+                    bg = "#d1fae5"; border = "1px solid #10b981"; fw = "bold";
+                  } else if (opt.code === q.studentChoice && !q.isCorrect) {
+                    bg = "#fee2e2"; border = "1px solid #ef4444";
+                  }
+
+                  return (
+                    <div key={opt.code} style={{padding: '12px', background: bg, borderRadius: '6px', border: border, fontWeight: fw, display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                      <span>{opt.code}. {opt.text}</span>
+                      {opt.code === q.studentChoice && (
+                        <span style={{fontSize: '12px', background: '#3b82f6', color: 'white', padding: '2px 8px', borderRadius: '12px', fontWeight: 'normal'}}>Lựa chọn của bạn</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // --- 4. COMPONENT PHÒNG THI (CHÍNH) ---
 export function ExamTake({ token, examId, me, onClose }) {
