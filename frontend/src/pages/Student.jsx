@@ -28,7 +28,7 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
       .catch(err => console.error("Lỗi lấy thống kê:", err));
   }, [token]);
 
-  // Lọc đề thi theo từ khóa (Tìm theo tên hoặc môn học)
+  // Lọc đề thi theo từ khóa Tìm theo tên hoặc môn học
   const filteredExams = exams.filter(e => {
     const keyword = searchQuery.toLowerCase();
     const matchTitle = e.title && e.title.toLowerCase().includes(keyword);
