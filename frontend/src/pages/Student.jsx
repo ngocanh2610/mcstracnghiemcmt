@@ -2,10 +2,20 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { API } from "../config";
 
+// Shared UI style presets to keep buttons and controls consistent
+const UI = {
+  button: { padding: '10px 14px', minWidth: '140px', height: '40px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' },
+  outline: { padding: '8px 12px', minWidth: '120px', height: '38px', borderRadius: '8px', background: '#fff', border: '1px solid #e5e7eb', cursor: 'pointer', fontSize: '14px' },
+  paletteBox: { width: '40px', height: '40px', margin: '4px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, cursor: 'pointer', background: '#fff', border: '1px solid #e5e7eb' }
+};
+
 // --- 1. COMPONENT DASHBOARD & TÌM KIẾM (MỚI THÊM) ---
 export function StudentDashboard({ token, exams, onTakeExam }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [attemptedCount, setAttemptedCount] = useState(0);
+  const [favorites, setFavorites] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('favExams') || '[]'); } catch { return []; }
+  });
 
   // Tính số đề đã làm từ lịch sử thi
   useEffect(() => {
@@ -26,11 +36,19 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
     return matchTitle || matchSubject;
   });
 
+  const toggleFavorite = (examId) => {
+    setFavorites(prev => {
+      const next = prev.includes(examId) ? prev.filter(id => id !== examId) : [...prev, examId];
+      try { localStorage.setItem('favExams', JSON.stringify(next)); } catch {};
+      return next;
+    });
+  };
+
   return (
     <div className="dashboard-container">
       {/* KHỐI THỐNG KÊ */}
       <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: '250px', padding: '20px', background: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1, minWidth: '250px', minHeight: '110px', padding: '20px', background: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h4 style={{ margin: '0 0 5px 0', color: '#1e3a8a' }}>Tổng số đề thi</h4>
             <p style={{ margin: 0, fontSize: '14px', color: '#3b82f6' }}>Hiện có trên hệ thống</p>
@@ -38,7 +56,7 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
           <span style={{ fontSize: '32px', fontWeight: 'bold', color: '#1d4ed8' }}>{exams.length}</span>
         </div>
 
-        <div style={{ flex: 1, minWidth: '250px', padding: '20px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1, minWidth: '250px', minHeight: '110px', padding: '20px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h4 style={{ margin: '0 0 5px 0', color: '#14532d' }}>Số đề đã thử sức</h4>
             <p style={{ margin: 0, fontSize: '14px', color: '#22c55e' }}>Đã hoàn thành ít nhất 1 lần</p>
@@ -64,17 +82,20 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
           filteredExams.map(exam => (
             <div key={exam.id} style={{ padding: '20px', background: 'white', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', border: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
-                <span style={{ display: 'inline-block', padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', marginBottom: '10px' }}>
-                  {exam.subject || "Thi trắc nghiệm"}
-                </span>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ display: 'inline-block', padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                    {exam.subject || "Thi trắc nghiệm"}
+                  </span>
+                  <button onClick={() => toggleFavorite(exam.id)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '18px', color: favorites.includes(exam.id) ? '#f59e0b' : '#9ca3af' }} aria-label="favorite">
+                    {favorites.includes(exam.id) ? '★' : '☆'}
+                  </button>
+                </div>
                 <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', color: '#111827' }}>{exam.title}</h3>
                 <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#6b7280' }}>⏱ Thời gian: {exam.duration} phút</p>
               </div>
               <button 
                 onClick={() => onTakeExam(exam.id)}
-                style={{ width: '100%', padding: '10px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'background 0.2s' }}
-                onMouseOver={(e) => e.target.style.background = '#2563eb'}
-                onMouseOut={(e) => e.target.style.background = '#3b82f6'}
+                style={{ ...UI.button, background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', width: '100%' }}
               >
                 📝 Bắt đầu làm bài
               </button>
@@ -91,10 +112,20 @@ export function StudentDashboard({ token, exams, onTakeExam }) {
 }
 
 // --- 2. COMPONENT LỊCH SỬ THI ---
-export function StudentHistory({ token, exams }) {
+export function StudentHistory({ token, exams, onTakeExam }) {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reviewId, setReviewId] = useState(null);
+
+  const downloadCSV = () => {
+    if (!history || history.length === 0) { alert('Không có lịch sử để tải xuống'); return; }
+    const rows = [['exam_title','date','score']];
+    history.forEach(h => rows.push([exams.find(e => e.id === h.exam_id)?.title || 'Đề đã xóa', new Date(h.created_at).toLocaleString(), h.score === null ? '' : h.score]));
+    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'history.csv'; a.click(); URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     axios.get(`${API}/submissions/my`, { headers: { Authorization: "Bearer " + token } })
@@ -111,7 +142,23 @@ export function StudentHistory({ token, exams }) {
 
   return (
     <div className="exam-box">
+      
+      {/* --- DÁN ĐOẠN CODE CỦA BẠN VÀO ĐÂY --- */}
+      <div className="student-welcome" style={{ borderLeft: '5px solid #10b981', padding: '15px', background: '#ecfdf5', margin: '20px 0', borderRadius: '8px' }}>
+          <h2 style={{ color: '#047857' }}>🎓 Xin chào Tân Sinh Viên!</h2>
+          <p>Chào mừng bạn đến với hệ thống thi trắc nghiệm. Chúc bạn đạt điểm cao!</p>
+          <i style={{ color: '#6ee7b7' }}>(Giao diện phát triển bởi Nam Anh)</i>
+      </div>
+      {/* ------------------------------------- */}
+
       <h3>Lịch sử thi</h3>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+        <button style={{ ...UI.outline }} onClick={downloadCSV}>⬇️ Tải lịch sử (CSV)</button>
+        {onTakeExam && <button style={{ ...UI.outline }} onClick={() => {
+          const last = history.slice().sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
+          if (last) onTakeExam(last.exam_id); else alert('Không có lịch sử để làm lại');
+        }}>🔁 Làm lại lần gần nhất</button>}
+      </div>
       {loading ? <p>Đang tải lịch sử...</p> : (
         <table className="history-table">
           <thead><tr><th>Đề thi</th><th>Ngày làm</th><th>Điểm</th><th>Hành động</th></tr></thead>
@@ -123,7 +170,7 @@ export function StudentHistory({ token, exams }) {
                 <td style={{fontWeight:'bold', color: h.score === null ? '#d97706' : '#16a34a'}}>{h.score !== null ? `${h.score}đ` : "Đang chấm..."}</td>
                 <td>
                   {h.score !== null && (
-                    <button className="btn-outline" style={{padding: '4px 10px', fontSize: '13px'}} onClick={() => setReviewId(h.id)}>
+                    <button className="btn-outline" style={{ ...UI.outline, padding: '4px 10px', fontSize: '13px' }} onClick={() => setReviewId(h.id)}>
                       👁️ Xem bài làm
                     </button>
                   )}
@@ -316,13 +363,29 @@ export function ExamTake({ token, examId, me, onClose }) {
   };
 
   const handleExit = () => {
-    if (window.confirm("Bạn có chắc muốn thoát? Mọi tiến trình chưa nộp bài sẽ dựa trên bản nháp cuối cùng!")) {
+    if (window.confirm("Bạn có chắc muốn thoát?")) {
       onClose(false);
     }
   };
 
   const toggleFlag = (qId) => {
     setFlagged(prev => ({ ...prev, [qId]: !prev[qId] }));
+  };
+
+  const clearDraft = async () => {
+    if (!window.confirm('Xác nhận xóa bản nháp cho đề thi này?')) return;
+    try {
+      await axios.delete(`${API}/submissions/draft/${examId}/${me.id}`, { headers: { Authorization: "Bearer " + token } });
+      setAnswers({});
+      setTimeLeft(data ? data.exam.duration * 60 : null);
+      alert('Đã xóa bản nháp. Mở lại đề thi để làm mới.');
+    } catch (err) { console.error(err); alert('Xóa nháp thất bại'); }
+  };
+
+  const goToNextUnanswered = () => {
+    const idx = data.questions.findIndex(q => !answers[q.id]);
+    if (idx === -1) { alert('Không còn câu chưa làm'); return; }
+    scrollToQuestion(idx);
   };
 
   if (!data) return <div className="exam-take-overlay"><div style={{padding: '50px', textAlign: 'center'}}>Đang tải đề thi...</div></div>;
@@ -335,13 +398,13 @@ export function ExamTake({ token, examId, me, onClose }) {
       <div className="exam-container-wide">
         <div className="exam-take-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <button className="btn-outline" onClick={handleExit} style={{ padding: '6px 12px', fontSize: '14px', border: 'none', background: '#fee2e2', color: '#ef4444' }}>
+              <button className="btn-outline" onClick={handleExit} style={{ ...UI.outline, padding: '6px 12px', fontSize: '14px', border: 'none', background: '#fee2e2', color: '#ef4444' }}>
                 ⬅ Thoát
               </button>
               <h3 style={{ margin: 0 }}>{data.exam.title}</h3>
             </div>
-            <div className={`timer ${timeLeft < 60 ? 'warning' : ''}`}>
-                ⏳ {Math.floor(timeLeft/60)}:{(timeLeft%60).toString().padStart(2, '0')}
+            <div className={`timer ${timeLeft !== null && timeLeft < 60 ? 'warning' : ''}`}>
+                {timeLeft !== null ? `⏳ ${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2, '0')}` : '⏳ --:--'}
             </div>
         </div>
         <div className="exam-layout-split">
@@ -358,34 +421,40 @@ export function ExamTake({ token, examId, me, onClose }) {
                   </div>
                   <div className="options-list">
                     {q.options.map(opt => (
-                      <label key={opt.id} className="option-item">
-                        <input type="radio" name={q.id} onChange={() => setAnswers({...answers, [q.id]: opt.code})} checked={answers[q.id] === opt.code} />
-                        <span>{opt.text}</span>
-                      </label>
+                      <label key={opt.id} className="option-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', borderRadius: '6px', background: '#fafafa', border: '1px solid #f1f5f9' }}>
+                          <input type="radio" name={q.id} onChange={() => setAnswers({...answers, [q.id]: opt.code})} checked={answers[q.id] === opt.code} />
+                          <span>{opt.text}</span>
+                        </label>
                     ))}
                   </div>
                 </div>
               );
             })}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-              <button className="btn-outline" disabled={currentPage === 0} onClick={() => { setCurrentPage(p => p - 1); window.scrollTo(0,0); }}>⬅ Trang trước</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px', alignItems: 'center' }}>
+              <button className="btn-outline" style={{ ...UI.outline }} disabled={currentPage === 0} onClick={() => { setCurrentPage(p => p - 1); window.scrollTo(0,0); }}>⬅ Trang trước</button>
               <span>Trang {currentPage + 1} / {totalPages}</span>
-              <button className="btn-outline" disabled={currentPage === totalPages - 1} onClick={() => { setCurrentPage(p => p + 1); window.scrollTo(0,0); }}>Trang sau ➡</button>
+              <button className="btn-outline" style={{ ...UI.outline }} disabled={currentPage === totalPages - 1} onClick={() => { setCurrentPage(p => p + 1); window.scrollTo(0,0); }}>Trang sau ➡</button>
             </div>
           </div>
           <div className="exam-palette-panel">
             <h4>Tiến độ</h4>
             <div className="palette-grid">
               {data.questions.map((q, i) => (
-                <button key={q.id} className={`palette-box ${answers[q.id] ? 'answered' : ''}`} onClick={() => scrollToQuestion(i)} style={{ border: flagged[q.id] ? '2px solid #ef4444' : '' }}>
+                <button key={q.id} className={`palette-box ${answers[q.id] ? 'answered' : ''}`} onClick={() => scrollToQuestion(i)} style={{ ...UI.paletteBox, border: flagged[q.id] ? '2px solid #ef4444' : UI.paletteBox.border, background: answers[q.id] ? '#d1fae5' : UI.paletteBox.background }}>
                   {i + 1}
                 </button>
               ))}
             </div>
             <div style={{marginTop: '25px'}}>
-              <button className="btn-primary" onClick={() => submit(false)} disabled={isSubmitting} style={{width:'100%'}}>
-                {isSubmitting ? "Đang xử lý..." : "Nộp bài ngay"}
-              </button>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="btn-primary" onClick={() => submit(false)} disabled={isSubmitting} style={{ ...UI.button, flex: 1, background: '#10b981', color: '#fff', border: 'none' }}>
+                  {isSubmitting ? "Đang xử lý..." : "Nộp bài ngay"}
+                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '140px' }}>
+                  <button style={{ ...UI.outline }} onClick={goToNextUnanswered}>➡ Câu chưa làm</button>
+                  <button style={{ ...UI.outline, background: '#fff7ed', color: '#b45309' }} onClick={clearDraft}>🗑️ Xóa nháp</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
