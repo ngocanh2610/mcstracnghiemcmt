@@ -193,9 +193,9 @@ function Main({ token, onLogout }) {
       <div className="modern-content">
         {view === "exam_list" && (
           <div className="motivational-banner" style={{ background: 'linear-gradient(to right, #ff416c, #ff4b2b)', color: 'white', padding: '30px', borderRadius: '15px', textAlign: 'center', border: '3px dashed white' }}>
-         <h1 style={{ margin: 0, fontSize: '32px' }}>💯 Xin chào {me.full_name}! Quyết tâm đạt điểm 10!</h1>
-         <p style={{ fontSize: '18px', marginTop: '10px' }}>Hôm nay bạn sẽ làm bài thật xuất sắc! (Giao diện màu Đỏ rực bởi Minh)</p>
-     </div>
+            <h1 style={{ margin: 0, fontSize: '32px' }}>💯 Xin chào {me.full_name}! Quyết tâm đạt điểm 10!</h1>
+            <p style={{ fontSize: '18px', marginTop: '10px' }}>Hôm nay bạn sẽ làm bài thật xuất sắc! (Giao diện màu Đỏ rực bởi Minh)</p>
+          </div>
 
         )}
         {view === "take_exam" && <StudentDashboard token={token} exams={exams} onTakeExam={setSelected} />}
@@ -206,7 +206,6 @@ function Main({ token, onLogout }) {
         {view === "admin_panel" && <AdminPanel token={token} refresh={fetchExams} />}
         {view === "profile" && <ProfileSettings token={token} user={me} />}
       </div>
-
       {selected && (
         <ExamTake
           token={token}
