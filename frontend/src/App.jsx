@@ -40,7 +40,7 @@ function Login({ onLogin, onSwitchRegister }) {
   return (
     <div className="login-container">
       <form className="login-card" onSubmit={handleSubmit}>
-        <h2>testCICD</h2>
+        <h2>Welcome back (CI CD)</h2>
         <input className="login-input" placeholder="Tên đăng nhập hoặc email" value={u} onChange={e => setU(e.target.value)} required />
         <input className="login-input" type="password" placeholder="Mật khẩu" value={p} onChange={e => setP(e.target.value)} required />
 
@@ -192,8 +192,10 @@ function Main({ token, onLogout }) {
       <div className="modern-content">
         {view === "exam_list" && (
           <div className="animate-fade-in" style={{ textAlign: 'center', padding: '40px' }}>
-            <h1>Xin chào, {me.full_name || me.username}! 👋</h1>
-            <p>Hôm nay bạn muốn thực hiện thử thách nào?</p>
+            <div className="welcome-banner" style={{ background: 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '30px', borderRadius: '15px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+              <h1 style={{ margin: 0, fontSize: '32px' }}>🏆 Chào mừng {me.full_name || me.username} đến với Hệ thống thi!</h1>
+              <p style={{ fontSize: '18px', marginTop: '10px' }}>Hãy tự tin thể hiện bản lĩnh của mình nhé! (Đây là Giao diện màu xanh biển bởi Khánh)</p>
+            </div>
           </div>
         )}
         {view === "take_exam" && <StudentDashboard token={token} exams={exams} onTakeExam={setSelected} />}
