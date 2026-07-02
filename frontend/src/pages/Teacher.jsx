@@ -30,7 +30,7 @@ export function ExamStats({ token, examId, onClose }) {
 
   useEffect(() => { loadStats(); }, [examId, token]);
 
-  // ✅ LOGIC VÀ NÚT CHẤM LẠI ĐÃ ĐƯỢC GIỮ NGUYÊN VÀ ĐẢM BẢO HOẠT ĐỘNG
+  // ✅ LOGIC VÀ NÚT CHẤM LẠI ĐÃ ĐƯỢC GIỮ NGUYÊN VÀ ĐẢM BẢO Hoạt động
   const handleRegrade = async () => {
     if (!window.confirm("Hành động này sẽ tính lại điểm cho toàn bộ bài thi dựa trên đáp án mới nhất. Tiếp tục?")) return;
     setLoading(true);
@@ -168,7 +168,7 @@ export function ExamManager({ token, me }) {
       {view === 'stats' ? <ExamStats token={token} examId={id} onClose={() => setView('list')} /> :
         view === 'edit' ? <ExamQuestionEditor token={token} examId={id} onClose={() => setView('list')} /> :
           <table className="history-table" style={{ width: '100%' }}>
-            <thead><tr><th>TÊN ĐỀ</th><th>MÔN</th><th style={{ textAlign: 'center' }}>HÀNH ĐỘNG</th></tr></thead>
+            <thead><tr><th>Tên Đề</th><th>Môn</th><th style={{ textAlign: 'center' }}>Hành Động</th></tr></thead>
             <tbody>
               {exams.map(ex => (
                 <tr key={ex.id}>
@@ -355,10 +355,30 @@ export function QuestionBankManager({ token }) {
         <button className="btn-primary" style={{ width: '100%', marginTop: '10px' }} onClick={handleSave}>💾 Lưu câu hỏi</button>
         {editId && <button className="btn-outline" style={{ width: '100%', marginTop: '5px' }} onClick={() => { setEditId(null); setQText(""); setOpts(["", "", "", ""]); }}>Hủy sửa</button>}
 
-        <div style={{ marginTop: '20px', border: '1px dashed #3b82f6', padding: '15px', textAlign: 'center', borderRadius: '8px' }}>
-          <p style={{ color: '#3b82f6', fontWeight: 'bold' }}>📄 Import Word (.docx)</p>
-          <input type="file" accept=".docx" onChange={handleImport} />
-        </div>
+        <div
+  style={{
+    marginTop: '20px',
+    padding: '20px',
+    border: '2px dashed #60a5fa',
+    borderRadius: '10px',
+    backgroundColor: '#f8fbff',
+    textAlign: 'center'
+  }}
+>
+  <h4 style={{ margin: '0 0 8px', color: '#2563eb' }}>
+    📄 Nhập câu hỏi từ Word
+  </h4>
+
+  <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#64748b' }}>
+    Chọn file <strong>.docx</strong> để import vào ngân hàng câu hỏi.
+  </p>
+
+  <input
+    type="file"
+    accept=".docx"
+    onChange={handleImport}
+  />
+</div>
       </div>
 
       <div className="card" style={{ flex: 1.5, padding: '20px', maxHeight: '75vh', overflowY: 'auto' }}>
