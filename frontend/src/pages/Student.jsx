@@ -363,7 +363,7 @@ export function ExamTake({ token, examId, me, onClose }) {
   };
 
   const handleExit = () => {
-    if (window.confirm("Bạn có chắc muốn thoát? Mọi tiến trình chưa nộp bài sẽ dựa trên bản nháp cuối cùng!")) {
+    if (window.confirm("Bạn có chắc muốn thoát?")) {
       onClose(false);
     }
   };
